@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>线性回归 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/linear_regression/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/linear_regression/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/linear_regression/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="线性回归">
+  <meta property="og:description" content="线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-29T18:45:25+08:00">
+    <meta property="article:modified_time" content="2025-09-29T18:45:25+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线性回归">
+<meta name="twitter:description" content="线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "线性回归",
+      "item": "https://eivver.github.io/posts/linear_regression/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "线性回归",
+  "name": "线性回归",
+  "description": "线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": "回归（regression）是能为一个或多个自变量与因变量之间关系建模的一类方法。\n线性回归（linear regression）基于几个简单的假设：\n首先，假设自变量$\\mathbf{x}$和因变量$y$之间的关系是线性的， 即$y$可以表示为$\\mathbf{x}$中元素的加权和，这里通常允许包含观测值的一些噪声；\n其次，我们假设任何噪声都比较正常，如噪声遵循正态分布。\n1 线性模型 1.1 多变量线性模型 对于单变量的线性模型我们在高中就学过了，实际问题一般会对应多个自变量(比如房屋价格和面积，房龄，地段等特征有关)。\n而要把单变量拓展到多变量也很简单，我们通常使用线性代数来表示，也会方便后面的计算。当我们的输入包含$d$个特征时，我们将预测结果$\\hat{y}$ （通常使用“尖角”符号表示$y$的估计值）表示为：\n$$\\hat{y} = w_1 x_1 + … + w_d x_d + b$$\n将所有特征放到向量$\\mathbf{x} \\in \\mathbb{R}^d$中， 并将所有权重放到向量$\\mathbf{w} \\in \\mathbb{R}^d$中， 我们可以用点积形式来简洁地表达模型：\n$$\\hat{y} = \\mathbf{w}^\\top \\mathbf{x} + b$$\n向量$\\mathbf{x}$对应于单个数据样本的特征。\n进一步的，考虑数据集中的所有样本，用符号表示的矩阵$\\mathbf{X} \\in \\mathbb{R}^{n \\times d}$ 可以很方便地引用我们整个数据集的$n$个样本。 其中，$\\mathbf{X}$的每一行是一个样本，每一列是一种特征。\n对于特征集合$\\mathbf{X}$，预测值$\\hat{\\mathbf{y}} \\in \\mathbb{R}^n$ 可以通过矩阵-向量乘法表示为：\n$${\\hat{\\mathbf{y}}} = \\mathbf{X} \\mathbf{w} + b$$\n$\\mathbf{w}$为权重，$b$为偏置 我们要找到合适的$\\mathbf{w}$和$b$使得预测的$\\hat{\\mathbf{y}}$与实际的$\\mathbf{y}$最接近 1.2 损失函数 要找到合适的$\\mathbf{w}$和$b$使得预测的$\\hat{\\mathbf{y}}$与实际的$\\mathbf{y}$最接近，我们就需要确定一个度量来判断二者的接近程度。损失函数（loss function）能够量化目标的实际值与预测值之间的差距。\n通常我们会选择非负数作为损失，且数值越小表示损失越小，完美预测时的损失为0。\n回归问题中最常用的损失函数是平方误差函数，可以通过极大似然估计来推导。 当样本$i$的预测值为$\\hat{y}^{(i)}$，其相应的真实标签为$y^{(i)}$时， 平方误差可以定义为以下公式：\n$$l^{(i)}(\\mathbf{w}, b) = \\frac{1}{2} \\left(\\hat{y}^{(i)} - y^{(i)}\\right)^2.$$\n考虑所有样本的损失和，写成矩阵形式：\n$$L(\\mathbf{w}, b) =\\frac{1}{n}\\sum_{i=1}^n l^{(i)}(\\mathbf{w}, b) =\\frac{1}{n} \\sum_{i=1}^n \\frac{1}{2}\\left(\\mathbf{w}^\\top \\mathbf{x}^{(i)} + b - y^{(i)}\\right)^2.$$\n1.3 随机梯度下降 假设我们得不到解析解，那我们要怎么去“猜”我们需要的权重和偏置呢？\n梯度下降（gradient descent）几乎可以优化所有深度学习模型。它通过不断地在损失函数递减的方向上更新参数来降低误差。\n梯度下降最简单的用法是计算损失函数（数据集中所有样本的损失均值）关于模型参数的导数（在这里也可以称为梯度）。但实际中的执行可能会非常慢：因为在每一次更新参数之前，我们必须遍历整个数据集。因此，我们通常会在每次需要计算更新的时候随机抽取一小批样本，这种变体叫做小批量随机梯度下降（minibatch stochastic gradient descent）。\n在每次迭代中，我们首先随机抽样一个小批量$\\mathcal{B}$，它是由固定数量的训练样本组成的。然后，我们计算小批量的平均损失关于模型参数的导数（也可以称为梯度）。最后，我们将梯度乘以一个预先确定的正数$\\eta$，并从当前参数的值中减掉。\n我们用下面的数学公式来表示这一更新过程（$\\partial$表示偏导数）：\n$$(\\mathbf{w},b) \\leftarrow (\\mathbf{w},b) - \\frac{\\eta}{|\\mathcal{B}|} \\sum_{i \\in \\mathcal{B}} \\partial_{(\\mathbf{w},b)} l^{(i)}(\\mathbf{w},b).$$\n算法的步骤如下：\n（1）初始化模型参数的值，如随机初始化； （2）从数据集中随机抽取小批量样本且在负梯度的方向上更新参数，并不断迭代这一步骤。 1.4 解析解 实际上线性回归是我们少数几个可以得到确定解析解的模型，以下是推导过程。\n因为$\\mathbf{w}$和$b$都是待求的参数，我们可以把$w\\mathbf{w}$和$b$吸收入向量形式$\\tilde{\\mathbf{w}} = (\\mathbf{w};b)$ ，相应的，样本矩阵也要变成$\\tilde{\\mathbf{X}}$，每行的最后一个元素恒为1，即： $$ \\tilde{\\mathbf{X}} = \\begin{bmatrix} \\mathbf{x}_1^\\top \u0026 1 \\\\ \\mathbf{x}_2^\\top \u0026 1 \\\\ \\vdots \u0026 \\vdots \\\\ \\mathbf{x}_n^\\top \u0026 1 \\end{bmatrix} \\in \\mathbb{R}^{n \\times (d+1)} $$\n于是预测值就可以简洁地写成：\n$$ \\hat{\\mathbf{y}} = \\tilde{\\mathbf{X}} \\tilde{\\mathbf{w}} $$\n使均方误差最小化可以得到：\n$$ \\tilde{\\mathbf{w}}^\\ast = (\\tilde{\\mathbf{X}}^\\top \\tilde{\\mathbf{X}})^{-1} \\tilde{\\mathbf{X}}^\\top \\mathbf{y} $$\n像线性回归这样的简单问题存在解析解，但并不是所有的问题都存在解析解。 解析解可以进行很好的数学分析，但解析解对问题的限制很严格，导致它无法广泛应用在深度学习里。\n1.5 神经网络图 这样的线性模型在深度学习中可以视为一个单层神经网络。\n在这个神经网络中，输入为$x_1, \\ldots, x_d$，因此输入层中的输入数（或称为特征维度，feature dimensionality）为$d$。网络的输出为$o_1$，因此输出层中的输出数是1。\n需要注意的是，输入值都是已经给定的，并且只有一个计算神经元。 由于模型重点在发生计算的地方，所以通常我们在计算层数时不考虑输入层。 也就是说，该神经网络的层数为1。我们可以将线性回归模型视为仅由单个人工神经元组成的神经网络，或称为单层神经网络。\n对于线性回归，每个输入都与每个输出（在本例中只有一个输出）相连， 我们将这种变换称为全连接层（fully-connected layer）或称为稠密层（dense layer）。\n2 模型的实现 我们可以使用PyTorch的高级API简洁地实现模型。\n在PyTorch中，data模块提供了数据处理工具，nn模块定义了大量的神经网络层和常见损失函数。\n2.1 生成数据 为了简单起见，我们将根据带有噪声的线性模型构造一个人造数据集。\ndef synthetic_data(w, b, num_examples): #@save \"\"\"生成y=Xw+b+噪声\"\"\" X = torch.normal(0, 1, (num_examples, len(w))) y = torch.matmul(X, w) + b y += torch.normal(0, 0.01, y.shape) return X, y.reshape((-1, 1)) # 生成的y原本是一维向量(1000)，将其reshape成(1000,1) true_w = torch.tensor([-1, 3.4]) true_b = 4.2 features, labels = synthetic_data(true_w, true_b, 1000) # 画出来看看 d2l.set_figsize() d2l.plt.scatter(features[:, (0)].detach().numpy(), labels.detach().numpy(), 1) d2l.plt.scatter(features[:, (1)].detach().numpy(), labels.detach().numpy(), 1) 2.2 读取数据 我们可以调用框架中现有的API来读取数据。 我们将features和labels作为API的参数传递，并通过数据迭代器指定batch_size。\nfrom torch.utils import data def load_array(data_arrays, batch_size, is_train=True): #@save \"\"\"构造一个PyTorch数据迭代器\"\"\" dataset = data.TensorDataset(*data_arrays) return data.DataLoader(dataset, batch_size, shuffle=is_train) batch_size = 10 data_iter = load_array((features, labels), batch_size) 代码解释：\nTensorDataset是PyTorch提供的一个数据集类，它可以把多个张量按样本对应起来。\n可以这么简单的理解：dataset[0] == (feature[0]，labels[0])， dataset[1] == (feature[1]，labels[1]) …\n也就是说，TensorDataset把特征和标签一一对应绑定，形成一个“数据集”。 *data_arrays的*表示拆包，这里就等价于我们传进去的(features, labels)。 DataLoader是PyTorch提供的一个迭代器，能从数据集里分批次（mini-batch）取数据。\n其中shuffle=True：是否随机打乱数据,\n得到的data_iter是一个可迭代对象。可以这样使用： for X, y in data_iter: print(X, y) # X 是一批特征，y 是对应的标签 每次返回的数量是batch_size 如果我们的data_iter的shuffle属性为True，每次返回的数据是随机的，否则为固定的 2.3 定义模型 对于标准深度学习模型，我们可以使用框架的预定义好的层。这使我们只需关注使用哪些层来构造模型，而不必关注层的实现细节。\n# nn是神经网络(Neural Network)的缩写 from torch import nn net = nn.Sequential(nn.Linear(2, 1)) nn.Linear 是全连接层也叫线性层，实现了一个最基本的仿射变换： $$y = xW^\\top + b$$ 输入参数：\nin_features：输入特征维度 out_features：输出特征维度 bias（可选，默认 True）：是否加偏置 $b$ eg: nn.Linear(2, 1)表示输入2维输出1维，默认带偏置\nnn.Sequential 是层的容器，可以把多个层按顺序“拼接”起来，当给定输入数据时，Sequential实例将数据传入到第一层， 然后将第一层的输出作为第二层的输入，以此类推。 eg：\nmodel = nn.Sequential( nn.Linear(2, 3), nn.ReLU(), #激活函数，对数据做了个非线性变换 nn.Linear(3, 1) ) 以上的模型就会对输入的x进行： x → Linear(2→3) → ReLU → Linear(3→1) → 输出\n我们的模型只包含一个层，因此实际上不需要Sequential。但是由于以后几乎所有的模型都是多层的，在这里使用Sequential提前熟悉“标准的流水线”。\n2.4 初始化参数 在对我们的网络进行训练之前还需要对待训练的权重weight和bias先进行初始化，如果所有权重初始化为 0，那么每个神经元的梯度完全一样，参数更新过程没有区别，网络就退化了，相当于只有一个神经元在学习。\n一般在调用nn.Linear(2, 1)的时候会有默认方案初始化，但是为了养成好习惯，还是需要手动初始化一下。\n以下是几种常见的初始化方法：\n方法 分布 适用激活 特点 Normal 正态 一般 简单、可控 std Uniform 均匀 一般 简单、可控范围 Xavier / Glorot 正态或均匀 Sigmoid/Tanh 保持方差稳定 He / Kaiming 正态或均匀 ReLU 考虑 ReLU 异质性，防梯度消失 Orthogonal 正交矩阵 RNN 保持信息传递稳定 我们这里就直接使用正态分布初始化了。\nnet[0].weight.data.normal_(0, 0.01) net[0].bias.data.fill_(0) 我们通过net[0]选择网络中的第一个图层，\n然后使用weight.data和bias.data方法访问参数。\n我们还可以使用替换方法normal_和fill_来重写参数值。\n2.5 损失函数 常用的损失函数有这些：\n任务类型 常用损失函数 PyTorch 类 回归 MSE, MAE, Huber MSELoss, L1Loss, SmoothL1Loss 二分类 BCE BCELoss, BCEWithLogitsLoss 多分类 Cross Entropy CrossEntropyLoss 序列/语言 NLL, CrossEntropy NLLLoss, CrossEntropyLoss 度量学习 Cosine, Contrastive, Triplet CosineEmbeddingLoss, 自定义 生成模型 BCE, Wasserstein BCELoss, 自定义 正如我们在前面所讨论的，回归问题一般使用均方误差作为损失函数。\n计算均方误差使用的是MSELoss类，也称为平方$L_2$范数。\n默认情况下，它返回所有样本损失的平均值。\nloss = nn.MSELoss() 2.6 优化算法 常用的优化算法：\n优化器 核心思想 适用场景 SGD 每次迭代用梯度下降更新参数 小模型、基础学习 SGD + Momentum 利用历史梯度加速收敛，减少震荡 CNN、卷积网络 Nesterov 预先修正梯度方向，提前“感知”未来更新 CNN、深层网络 Adagrad 每个参数独立学习率，对稀疏梯度自适应调整 稀疏特征、NLP RMSProp 对梯度平方做指数加权平均，自适应调整学习率 RNN、LSTM Adam 结合动量和自适应学习率，快速收敛 大多数深度学习任务 AdamW Adam + 权重衰减正则化，提高泛化能力 Transformer、NLP Nadam Adam + Nesterov 动量 特殊深层网络 小批量随机梯度下降算法是一种优化神经网络的标准工具，PyTorch在optim模块中实现了该算法的许多变种。\n当我们实例化一个SGD实例时，我们要指定优化的参数（可通过net.parameters()从我们的模型中获得）以及优化算法所需的超参数字典。\n小批量随机梯度下降只需要设置lr值，这里设置为0.03。\ntrainer = torch.optim.SGD(net.parameters(), lr=0.03) 2.7 训练模型 当我们完成前面的准备工作，得到了数据集，模型，损失函数，优化器就可以开始对我们的模型进行训练了。\nnum_epochs = 3 for epoch in range(num_epochs): for X, y in data_iter: l = loss(net(X) ,y) # net(X)也即预测的y trainer.zero_grad() # 梯度清零 l.backward() # 反向传播 trainer.step() # 更新参数 l = loss(net(features), labels) print(f'epoch {epoch + 1}, loss {l:f}') trainer = torch.optim.SGD(net.parameters(), lr=0.03) 是在 PyTorch 里创建一个 优化器对象，它负责更新参数。torch.optim.SGD 继承自 torch.optim.Optimizer，因此它内部的方法和属性基本上和所有优化器通用。\n常用方法\nstep()：遍历参数组 → 遍历参数 → 按算法更新参数 zero_grad()：清空所有参数的梯度，避免梯度累积。 state_dict()/load_state_dict()：保存/恢复优化器的全部信息（学习率、动量缓存等） add_param_group()：动态加一组参数进来，常用于微调时给新层加优化策略。 ",
+  "wordCount" : "4683",
+  "inLanguage": "zh",
+  "datePublished": "2025-09-29T18:45:25+08:00",
+  "dateModified": "2025-09-29T18:45:25+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/linear_regression/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                线性回归
+            </h1>
+            <div class="post-description">
+                线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。
+            </div>
+            <div class="post-meta">创建:&nbsp;<span title='2025-09-29 18:45:25 +0800 CST'>2025-09-29</span>&nbsp;|&nbsp;字数:&nbsp;4683字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e7%ba%bf%e6%80%a7%e6%a8%a1%e5%9e%8b" aria-label="1 线性模型">1 线性模型</a><ul>
+                        
+                <li>
+                    <a href="#11-%e5%a4%9a%e5%8f%98%e9%87%8f%e7%ba%bf%e6%80%a7%e6%a8%a1%e5%9e%8b" aria-label="1.1 多变量线性模型">1.1 多变量线性模型</a></li>
+                <li>
+                    <a href="#12-%e6%8d%9f%e5%a4%b1%e5%87%bd%e6%95%b0" aria-label="1.2 损失函数">1.2 损失函数</a></li>
+                <li>
+                    <a href="#13-%e9%9a%8f%e6%9c%ba%e6%a2%af%e5%ba%a6%e4%b8%8b%e9%99%8d" aria-label="1.3 随机梯度下降">1.3 随机梯度下降</a></li>
+                <li>
+                    <a href="#14-%e8%a7%a3%e6%9e%90%e8%a7%a3" aria-label="1.4 解析解">1.4 解析解</a></li>
+                <li>
+                    <a href="#15-%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e5%9b%be" aria-label="1.5 神经网络图">1.5 神经网络图</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e6%a8%a1%e5%9e%8b%e7%9a%84%e5%ae%9e%e7%8e%b0" aria-label="2 模型的实现">2 模型的实现</a><ul>
+                        
+                <li>
+                    <a href="#21-%e7%94%9f%e6%88%90%e6%95%b0%e6%8d%ae" aria-label="2.1 生成数据">2.1 生成数据</a></li>
+                <li>
+                    <a href="#22-%e8%af%bb%e5%8f%96%e6%95%b0%e6%8d%ae" aria-label="2.2 读取数据">2.2 读取数据</a></li>
+                <li>
+                    <a href="#23-%e5%ae%9a%e4%b9%89%e6%a8%a1%e5%9e%8b" aria-label="2.3 定义模型">2.3 定义模型</a></li>
+                <li>
+                    <a href="#24-%e5%88%9d%e5%a7%8b%e5%8c%96%e5%8f%82%e6%95%b0" aria-label="2.4 初始化参数">2.4 初始化参数</a></li>
+                <li>
+                    <a href="#25-%e6%8d%9f%e5%a4%b1%e5%87%bd%e6%95%b0" aria-label="2.5 损失函数">2.5 损失函数</a></li>
+                <li>
+                    <a href="#26-%e4%bc%98%e5%8c%96%e7%ae%97%e6%b3%95" aria-label="2.6 优化算法">2.6 优化算法</a></li>
+                <li>
+                    <a href="#27-%e8%ae%ad%e7%bb%83%e6%a8%a1%e5%9e%8b" aria-label="2.7 训练模型">2.7 训练模型</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><p><strong>回归</strong>（regression）是能为一个或多个自变量与因变量之间关系建模的一类方法。<br>
+<strong>线性回归</strong>（linear regression）基于几个简单的假设：<br>
+首先，假设自变量$\mathbf{x}$和因变量$y$之间的关系是线性的，
+即$y$可以表示为$\mathbf{x}$中元素的加权和，这里通常允许包含观测值的一些噪声；<br>
+其次，我们假设任何噪声都比较正常，如噪声遵循正态分布。</p>
+<h2 id="1-线性模型">1 线性模型<a hidden class="anchor" aria-hidden="true" href="#1-线性模型">#</a></h2>
+<h3 id="11-多变量线性模型">1.1 多变量线性模型<a hidden class="anchor" aria-hidden="true" href="#11-多变量线性模型">#</a></h3>
+<p>对于单变量的线性模型我们在高中就学过了，实际问题一般会对应多个自变量(比如房屋价格和面积，房龄，地段等特征有关)。<br>
+而要把单变量拓展到多变量也很简单，我们通常使用线性代数来表示，也会方便后面的计算。当我们的输入包含$d$个特征时，我们将预测结果$\hat{y}$
+（通常使用“尖角”符号表示$y$的估计值）表示为：</p>
+<p>$$\hat{y} = w_1  x_1 + &hellip; + w_d  x_d + b$$</p>
+<p>将所有特征放到向量$\mathbf{x} \in \mathbb{R}^d$中，
+并将所有权重放到向量$\mathbf{w} \in \mathbb{R}^d$中，
+我们可以用点积形式来简洁地表达模型：</p>
+<p>$$\hat{y} = \mathbf{w}^\top \mathbf{x} + b$$</p>
+<p>向量$\mathbf{x}$对应于单个数据样本的特征。</p>
+<p>进一步的，考虑数据集中的所有样本，用符号表示的矩阵$\mathbf{X} \in \mathbb{R}^{n \times d}$
+可以很方便地引用我们整个数据集的$n$个样本。
+其中，$\mathbf{X}$的每一行是一个样本，每一列是一种特征。<br>
+对于特征集合$\mathbf{X}$，预测值$\hat{\mathbf{y}} \in \mathbb{R}^n$
+可以通过矩阵-向量乘法表示为：</p>
+<p>$${\hat{\mathbf{y}}} = \mathbf{X} \mathbf{w} + b$$</p>
+<ul>
+<li>$\mathbf{w}$为权重，$b$为偏置</li>
+<li>我们要找到合适的$\mathbf{w}$和$b$使得预测的$\hat{\mathbf{y}}$与实际的$\mathbf{y}$最接近</li>
+</ul>
+<h3 id="12-损失函数">1.2 损失函数<a hidden class="anchor" aria-hidden="true" href="#12-损失函数">#</a></h3>
+<p>要找到合适的$\mathbf{w}$和$b$使得预测的$\hat{\mathbf{y}}$与实际的$\mathbf{y}$最接近，我们就需要确定一个度量来判断二者的接近程度。<strong>损失函数</strong>（loss function）能够量化目标的<em>实际</em>值与<em>预测</em>值之间的差距。<br>
+通常我们会选择非负数作为损失，且数值越小表示损失越小，完美预测时的损失为0。<br>
+回归问题中最常用的损失函数是平方误差函数，可以通过极大似然估计来推导。
+当样本$i$的预测值为$\hat{y}^{(i)}$，其相应的真实标签为$y^{(i)}$时，
+平方误差可以定义为以下公式：</p>
+<p>$$l^{(i)}(\mathbf{w}, b) = \frac{1}{2} \left(\hat{y}^{(i)} - y^{(i)}\right)^2.$$</p>
+<p>考虑所有样本的损失和，写成矩阵形式：</p>
+<p>$$L(\mathbf{w}, b) =\frac{1}{n}\sum_{i=1}^n l^{(i)}(\mathbf{w}, b) =\frac{1}{n} \sum_{i=1}^n \frac{1}{2}\left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right)^2.$$</p>
+<h3 id="13-随机梯度下降">1.3 随机梯度下降<a hidden class="anchor" aria-hidden="true" href="#13-随机梯度下降">#</a></h3>
+<p>假设我们得不到解析解，那我们要怎么去“猜”我们需要的权重和偏置呢？<br>
+<strong>梯度下降</strong>（gradient descent）几乎可以优化所有深度学习模型。它通过不断地在损失函数递减的方向上更新参数来降低误差。</p>
+<p>梯度下降最简单的用法是计算损失函数（数据集中所有样本的损失均值）关于模型参数的导数（在这里也可以称为梯度）。但实际中的执行可能会非常慢：因为在每一次更新参数之前，我们必须遍历整个数据集。因此，我们通常会在每次需要计算更新的时候随机抽取一小批样本，这种变体叫做<strong>小批量随机梯度下降</strong>（minibatch stochastic gradient descent）。</p>
+<p>在每次迭代中，我们首先随机抽样一个小批量$\mathcal{B}$，它是由固定数量的训练样本组成的。然后，我们计算小批量的平均损失关于模型参数的导数（也可以称为梯度）。最后，我们将梯度乘以一个预先确定的正数$\eta$，并从当前参数的值中减掉。</p>
+<p>我们用下面的数学公式来表示这一更新过程（$\partial$表示偏导数）：</p>
+<p>$$(\mathbf{w},b) \leftarrow (\mathbf{w},b) - \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \partial_{(\mathbf{w},b)} l^{(i)}(\mathbf{w},b).$$</p>
+<p>算法的步骤如下：</p>
+<ul>
+<li>（1）初始化模型参数的值，如随机初始化；</li>
+<li>（2）从数据集中随机抽取小批量样本且在负梯度的方向上更新参数，并不断迭代这一步骤。</li>
+</ul>
+<h3 id="14-解析解">1.4 解析解<a hidden class="anchor" aria-hidden="true" href="#14-解析解">#</a></h3>
+<p>实际上线性回归是我们少数几个可以得到确定解析解的模型，以下是推导过程。</p>
+<p>因为$\mathbf{w}$和$b$都是待求的参数，我们可以把$w\mathbf{w}$和$b$吸收入向量形式$\tilde{\mathbf{w}} = (\mathbf{w};b)$ ，相应的，样本矩阵也要变成$\tilde{\mathbf{X}}$，每行的最后一个元素恒为1，即：
+$$
+\tilde{\mathbf{X}} = \begin{bmatrix}
+\mathbf{x}_1^\top &amp; 1 \\
+\mathbf{x}_2^\top &amp; 1 \\
+\vdots &amp; \vdots \\
+\mathbf{x}_n^\top &amp; 1
+\end{bmatrix} \in \mathbb{R}^{n \times (d+1)}
+$$</p>
+<p>于是预测值就可以简洁地写成：</p>
+<p>$$
+\hat{\mathbf{y}} = \tilde{\mathbf{X}} \tilde{\mathbf{w}}
+$$</p>
+<p>使均方误差最小化可以得到：</p>
+<p>$$
+\tilde{\mathbf{w}}^\ast = (\tilde{\mathbf{X}}^\top \tilde{\mathbf{X}})^{-1} \tilde{\mathbf{X}}^\top \mathbf{y}
+$$</p>
+<p>像线性回归这样的简单问题存在解析解，但并不是所有的问题都存在解析解。 解析解可以进行很好的数学分析，但解析解对问题的限制很严格，导致它无法广泛应用在深度学习里。</p>
+<h3 id="15-神经网络图">1.5 神经网络图<a hidden class="anchor" aria-hidden="true" href="#15-神经网络图">#</a></h3>
+<p>这样的线性模型在深度学习中可以视为一个单层神经网络。<br>
+<img alt="单层神经网络" loading="lazy" src="/img/linear_regression/Single%20Layer%20Net.png"></p>
+<p>在这个神经网络中，输入为$x_1, \ldots, x_d$，因此输入层中的<em>输入数</em>（或称为<em>特征维度</em>，feature dimensionality）为$d$。网络的输出为$o_1$，因此输出层中的<em>输出数</em>是1。<br>
+需要注意的是，输入值都是已经给定的，并且只有一个<em>计算</em>神经元。
+由于模型重点在发生计算的地方，所以通常我们在计算层数时不考虑输入层。
+也就是说，该神经网络的<em>层数</em>为1。我们可以将线性回归模型视为仅由单个人工神经元组成的神经网络，或称为单层神经网络。</p>
+<p>对于线性回归，每个输入都与每个输出（在本例中只有一个输出）相连，
+我们将这种变换称为<em>全连接层</em>（fully-connected layer）或称为<em>稠密层</em>（dense layer）。</p>
+<h2 id="2-模型的实现">2 模型的实现<a hidden class="anchor" aria-hidden="true" href="#2-模型的实现">#</a></h2>
+<p>我们可以使用PyTorch的高级API简洁地实现模型。<br>
+在PyTorch中，<code>data</code>模块提供了数据处理工具，<code>nn</code>模块定义了大量的神经网络层和常见损失函数。</p>
+<h3 id="21-生成数据">2.1 生成数据<a hidden class="anchor" aria-hidden="true" href="#21-生成数据">#</a></h3>
+<p>为了简单起见，我们将根据带有噪声的线性模型构造一个人造数据集。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">synthetic_data</span>(w, b, num_examples):  <span style="color:#75715e">#@save</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;生成y=Xw+b+噪声&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>normal(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, (num_examples, len(w)))
+</span></span><span style="display:flex;"><span>    y <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>matmul(X, w) <span style="color:#f92672">+</span> b
+</span></span><span style="display:flex;"><span>    y <span style="color:#f92672">+=</span> torch<span style="color:#f92672">.</span>normal(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0.01</span>, y<span style="color:#f92672">.</span>shape)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> X, y<span style="color:#f92672">.</span>reshape((<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>))        <span style="color:#75715e"># 生成的y原本是一维向量(1000)，将其reshape成(1000,1)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>true_w <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">3.4</span>])
+</span></span><span style="display:flex;"><span>true_b <span style="color:#f92672">=</span> <span style="color:#ae81ff">4.2</span>
+</span></span><span style="display:flex;"><span>features, labels <span style="color:#f92672">=</span> synthetic_data(true_w, true_b, <span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 画出来看看</span>
+</span></span><span style="display:flex;"><span>d2l<span style="color:#f92672">.</span>set_figsize()
+</span></span><span style="display:flex;"><span>d2l<span style="color:#f92672">.</span>plt<span style="color:#f92672">.</span>scatter(features[:, (<span style="color:#ae81ff">0</span>)]<span style="color:#f92672">.</span>detach()<span style="color:#f92672">.</span>numpy(), labels<span style="color:#f92672">.</span>detach()<span style="color:#f92672">.</span>numpy(), <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>d2l<span style="color:#f92672">.</span>plt<span style="color:#f92672">.</span>scatter(features[:, (<span style="color:#ae81ff">1</span>)]<span style="color:#f92672">.</span>detach()<span style="color:#f92672">.</span>numpy(), labels<span style="color:#f92672">.</span>detach()<span style="color:#f92672">.</span>numpy(), <span style="color:#ae81ff">1</span>)
+</span></span></code></pre></div><p><img alt="生成的数据" loading="lazy" src="/img/linear_regression/gen_data.svg"></p>
+<h3 id="22-读取数据">2.2 读取数据<a hidden class="anchor" aria-hidden="true" href="#22-读取数据">#</a></h3>
+<p>我们可以<strong>调用框架中现有的API来读取数据</strong>。
+我们将<code>features</code>和<code>labels</code>作为API的参数传递，并通过数据迭代器指定<code>batch_size</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> torch.utils <span style="color:#f92672">import</span> data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">load_array</span>(data_arrays, batch_size, is_train<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>):  <span style="color:#75715e">#@save</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;构造一个PyTorch数据迭代器&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    dataset <span style="color:#f92672">=</span> data<span style="color:#f92672">.</span>TensorDataset(<span style="color:#f92672">*</span>data_arrays)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> data<span style="color:#f92672">.</span>DataLoader(dataset, batch_size, shuffle<span style="color:#f92672">=</span>is_train)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>batch_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>data_iter <span style="color:#f92672">=</span> load_array((features, labels), batch_size)
+</span></span></code></pre></div><p>代码解释：</p>
+<ol>
+<li><code>TensorDataset</code>是PyTorch提供的一个数据集类，它可以把多个张量按样本对应起来。<br>
+可以这么简单的理解：dataset[0] == (feature[0]，labels[0])， dataset[1] == (feature[1]，labels[1]) &hellip;<br>
+也就是说，<code>TensorDataset</code>把特征和标签一一对应绑定，形成一个“数据集”。</li>
+<li><code>*data_arrays</code>的<code>*</code>表示拆包，这里就等价于我们传进去的(features, labels)。</li>
+<li><code>DataLoader</code>是PyTorch提供的一个迭代器，能从数据集里分批次（mini-batch）取数据。<br>
+其中<code>shuffle=True</code>：是否随机打乱数据,<br>
+得到的<code>data_iter</code>是一个可迭代对象。可以这样使用：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">for</span> X, y <span style="color:#f92672">in</span> data_iter:
+</span></span><span style="display:flex;"><span>    print(X, y)   <span style="color:#75715e"># X 是一批特征，y 是对应的标签</span>
+</span></span></code></pre></div><ul>
+<li>每次返回的数量是batch_size</li>
+<li>如果我们的data_iter的shuffle属性为True，每次返回的数据是随机的，否则为固定的</li>
+</ul>
+</li>
+</ol>
+<h3 id="23-定义模型">2.3 定义模型<a hidden class="anchor" aria-hidden="true" href="#23-定义模型">#</a></h3>
+<p>对于标准深度学习模型，我们可以<strong>使用框架的预定义好的层</strong>。这使我们只需关注使用哪些层来构造模型，而不必关注层的实现细节。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># nn是神经网络(Neural Network)的缩写</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> torch <span style="color:#f92672">import</span> nn
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">1</span>))
+</span></span></code></pre></div><p><code>nn.Linear</code> 是全连接层也叫线性层，实现了一个最基本的仿射变换：
+$$y = xW^\top + b$$
+<strong>输入参数</strong>：</p>
+<ul>
+<li><code>in_features</code>：输入特征维度</li>
+<li><code>out_features</code>：输出特征维度</li>
+<li><code>bias</code>（可选，默认 <code>True</code>）：是否加偏置 $b$</li>
+</ul>
+<p>eg: nn.Linear(2, 1)表示输入2维输出1维，默认带偏置</p>
+<p><code>nn.Sequential</code> 是层的容器，可以把多个层按顺序“拼接”起来，当给定输入数据时，Sequential实例将数据传入到第一层， 然后将第一层的输出作为第二层的输入，以此类推。
+eg：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>model <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>),
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>ReLU(),          <span style="color:#75715e">#激活函数，对数据做了个非线性变换</span>
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>以上的模型就会对输入的x进行： <code>x → Linear(2→3) → ReLU → Linear(3→1) → 输出</code></p>
+<p><em>我们的模型只包含一个层，因此实际上不需要Sequential。但是由于以后几乎所有的模型都是多层的，在这里使用Sequential提前熟悉“标准的流水线”。</em></p>
+<h3 id="24-初始化参数">2.4 初始化参数<a hidden class="anchor" aria-hidden="true" href="#24-初始化参数">#</a></h3>
+<p>在对我们的网络进行训练之前还需要对待训练的权重weight和bias先进行初始化，<strong>如果所有权重初始化为 0，那么每个神经元的梯度完全一样，参数更新过程没有区别，网络就退化了</strong>，相当于只有一个神经元在学习。<br>
+一般在调用nn.Linear(2, 1)的时候会有默认方案初始化，但是为了养成好习惯，还是需要手动初始化一下。<br>
+以下是几种常见的初始化方法：</p>
+<table>
+  <thead>
+      <tr>
+          <th>方法</th>
+          <th>分布</th>
+          <th>适用激活</th>
+          <th>特点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Normal</td>
+          <td>正态</td>
+          <td>一般</td>
+          <td>简单、可控 std</td>
+      </tr>
+      <tr>
+          <td>Uniform</td>
+          <td>均匀</td>
+          <td>一般</td>
+          <td>简单、可控范围</td>
+      </tr>
+      <tr>
+          <td>Xavier / Glorot</td>
+          <td>正态或均匀</td>
+          <td>Sigmoid/Tanh</td>
+          <td>保持方差稳定</td>
+      </tr>
+      <tr>
+          <td>He / Kaiming</td>
+          <td>正态或均匀</td>
+          <td>ReLU</td>
+          <td>考虑 ReLU 异质性，防梯度消失</td>
+      </tr>
+      <tr>
+          <td>Orthogonal</td>
+          <td>正交矩阵</td>
+          <td>RNN</td>
+          <td>保持信息传递稳定</td>
+      </tr>
+  </tbody>
+</table>
+<p>我们这里就直接使用正态分布初始化了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>net[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>weight<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>normal_(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>net[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>bias<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>fill_(<span style="color:#ae81ff">0</span>)
+</span></span></code></pre></div><p>我们通过<code>net[0]</code>选择网络中的第一个图层，<br>
+然后使用<code>weight.data</code>和<code>bias.data</code>方法访问参数。<br>
+我们还可以使用替换方法<code>normal_</code>和<code>fill_</code>来重写参数值。</p>
+<h3 id="25-损失函数">2.5 损失函数<a hidden class="anchor" aria-hidden="true" href="#25-损失函数">#</a></h3>
+<p>常用的损失函数有这些：</p>
+<table>
+  <thead>
+      <tr>
+          <th>任务类型</th>
+          <th>常用损失函数</th>
+          <th>PyTorch 类</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>回归</td>
+          <td>MSE, MAE, Huber</td>
+          <td><code>MSELoss</code>, <code>L1Loss</code>, <code>SmoothL1Loss</code></td>
+      </tr>
+      <tr>
+          <td>二分类</td>
+          <td>BCE</td>
+          <td><code>BCELoss</code>, <code>BCEWithLogitsLoss</code></td>
+      </tr>
+      <tr>
+          <td>多分类</td>
+          <td>Cross Entropy</td>
+          <td><code>CrossEntropyLoss</code></td>
+      </tr>
+      <tr>
+          <td>序列/语言</td>
+          <td>NLL, CrossEntropy</td>
+          <td><code>NLLLoss</code>, <code>CrossEntropyLoss</code></td>
+      </tr>
+      <tr>
+          <td>度量学习</td>
+          <td>Cosine, Contrastive, Triplet</td>
+          <td><code>CosineEmbeddingLoss</code>, 自定义</td>
+      </tr>
+      <tr>
+          <td>生成模型</td>
+          <td>BCE, Wasserstein</td>
+          <td><code>BCELoss</code>, 自定义</td>
+      </tr>
+  </tbody>
+</table>
+<p>正如我们在前面所讨论的，回归问题一般使用均方误差作为损失函数。<br>
+<strong>计算均方误差使用的是<code>MSELoss</code>类，也称为平方$L_2$范数</strong>。<br>
+默认情况下，它返回所有样本损失的平均值。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>loss <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>MSELoss()
+</span></span></code></pre></div><h3 id="26-优化算法">2.6 优化算法<a hidden class="anchor" aria-hidden="true" href="#26-优化算法">#</a></h3>
+<p>常用的优化算法：</p>
+<table>
+  <thead>
+      <tr>
+          <th>优化器</th>
+          <th>核心思想</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>SGD</strong></td>
+          <td>每次迭代用梯度下降更新参数</td>
+          <td>小模型、基础学习</td>
+      </tr>
+      <tr>
+          <td><strong>SGD + Momentum</strong></td>
+          <td>利用历史梯度加速收敛，减少震荡</td>
+          <td>CNN、卷积网络</td>
+      </tr>
+      <tr>
+          <td><strong>Nesterov</strong></td>
+          <td>预先修正梯度方向，提前“感知”未来更新</td>
+          <td>CNN、深层网络</td>
+      </tr>
+      <tr>
+          <td><strong>Adagrad</strong></td>
+          <td>每个参数独立学习率，对稀疏梯度自适应调整</td>
+          <td>稀疏特征、NLP</td>
+      </tr>
+      <tr>
+          <td><strong>RMSProp</strong></td>
+          <td>对梯度平方做指数加权平均，自适应调整学习率</td>
+          <td>RNN、LSTM</td>
+      </tr>
+      <tr>
+          <td><strong>Adam</strong></td>
+          <td>结合动量和自适应学习率，快速收敛</td>
+          <td>大多数深度学习任务</td>
+      </tr>
+      <tr>
+          <td><strong>AdamW</strong></td>
+          <td>Adam + 权重衰减正则化，提高泛化能力</td>
+          <td>Transformer、NLP</td>
+      </tr>
+      <tr>
+          <td><strong>Nadam</strong></td>
+          <td>Adam + Nesterov 动量</td>
+          <td>特殊深层网络</td>
+      </tr>
+  </tbody>
+</table>
+<p>小批量随机梯度下降算法是一种优化神经网络的标准工具，PyTorch在<code>optim</code>模块中实现了该算法的许多变种。<br>
+当我们<strong>实例化一个<code>SGD</code>实例</strong>时，我们要指定优化的参数（可通过<code>net.parameters()</code>从我们的模型中获得）以及优化算法所需的超参数字典。<br>
+小批量随机梯度下降只需要设置<code>lr</code>值，这里设置为0.03。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>trainer <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>SGD(net<span style="color:#f92672">.</span>parameters(), lr<span style="color:#f92672">=</span><span style="color:#ae81ff">0.03</span>)
+</span></span></code></pre></div><h3 id="27-训练模型">2.7 训练模型<a hidden class="anchor" aria-hidden="true" href="#27-训练模型">#</a></h3>
+<p>当我们完成前面的准备工作，得到了数据集，模型，损失函数，优化器就可以开始对我们的模型进行训练了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>num_epochs <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> epoch <span style="color:#f92672">in</span> range(num_epochs):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> X, y <span style="color:#f92672">in</span> data_iter:
+</span></span><span style="display:flex;"><span>        l <span style="color:#f92672">=</span> loss(net(X) ,y)         <span style="color:#75715e"># net(X)也即预测的y</span>
+</span></span><span style="display:flex;"><span>        trainer<span style="color:#f92672">.</span>zero_grad()         <span style="color:#75715e"># 梯度清零</span>
+</span></span><span style="display:flex;"><span>        l<span style="color:#f92672">.</span>backward()                <span style="color:#75715e"># 反向传播</span>
+</span></span><span style="display:flex;"><span>        trainer<span style="color:#f92672">.</span>step()              <span style="color:#75715e"># 更新参数</span>
+</span></span><span style="display:flex;"><span>    l <span style="color:#f92672">=</span> loss(net(features), labels)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;epoch </span><span style="color:#e6db74">{</span>epoch <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, loss </span><span style="color:#e6db74">{</span>l<span style="color:#e6db74">:</span><span style="color:#e6db74">f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span></code></pre></div><p><code>trainer = torch.optim.SGD(net.parameters(), lr=0.03)</code> 是在 PyTorch 里创建一个 <strong>优化器对象</strong>，它负责更新参数。<code>torch.optim.SGD</code> 继承自 <code>torch.optim.Optimizer</code>，因此它内部的方法和属性基本上和所有优化器通用。</p>
+<p>常用方法</p>
+<ul>
+<li><code>step()</code>：遍历参数组 → 遍历参数 → 按算法更新参数</li>
+<li><code>zero_grad()</code>：清空所有参数的梯度，避免梯度累积。</li>
+<li><code>state_dict()/load_state_dict()</code>：保存/恢复优化器的全部信息（学习率、动量缓存等）</li>
+<li><code>add_param_group()</code>：动态加一组参数进来，常用于微调时给新层加优化策略。</li>
+</ul>
+
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/softmax_regression/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Softmax回归</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/autograd/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>自动求导</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

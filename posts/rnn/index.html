@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>循环神经网络 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/rnn/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/rnn/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/rnn/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="循环神经网络">
+  <meta property="og:description" content="循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-10-10T13:18:47+08:00">
+    <meta property="article:modified_time" content="2025-10-10T13:18:47+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+    <meta property="og:image" content="https://eivver.github.io/img/rnn/RNN_.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://eivver.github.io/img/rnn/RNN_.png">
+<meta name="twitter:title" content="循环神经网络">
+<meta name="twitter:description" content="循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "循环神经网络",
+      "item": "https://eivver.github.io/posts/rnn/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "循环神经网络",
+  "name": "循环神经网络",
+  "description": "循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": "1 序列模型 在现实世界中，数据并不总是由相互独立的样本组成。许多任务涉及时间或顺序相关的数据，例如：\n一段语音信号随时间变化； 一句自然语言由前后相关的词构成； 股票价格、传感器读数、交通流量等时间序列。 1.1 序列模型特征 这类数据通常具有时序依赖性（temporal dependency）——即当前时刻的状态往往受到过去输入的影响。\n然而，传统的多层感知机（MLP）或卷积神经网络（CNN）假设输入之间是独立的，因此很难捕捉时间维度上的依赖关系：\nMLP 会将输入展平成一维向量，完全丢失序列的前后顺序； CNN 虽能在空间上提取局部特征，但并不具备随时间“记忆”的能力。 为了建模这类数据，我们需要一种能够在时间上累积信息、保留上下文关系的模型。\n1.2 文本序列处理 对于文本我们通常的处理方式是将字符串拆成字符或者单词，然后建立一个词表进行映射，模型的输入输出都使用数字索引序列进行操作。\n词元(token)：将字符串拆成字符或者单词的操作是tokenize，这里的字符或者单词也叫词元(token)，它是文本的基本单位。\n\"I love deep learning\" → [\"I\", \"love\", \"deep\", \"learning\"] 词表（vocabulary）：因为词元都是字符串，模型不容易处理，所以需要构建词元和数字的映射，词表就是用来存储这个映射的，通常会把出现频率高的词元赋予较小的数字索引，并且会删除一部分出现频率低的词元。\n除了这些还会把词表中不存在或已删除的任何词元都将映射到一个特定的未知词元“”。\n还可以选择增加一个列表，用于保存那些被保留的词元， 例如：填充词元（“”）； 序列开始词元（“”）； 序列结束词元（“”）\n{\"I\": 0, \"love\": 1, \"deep\": 2, \"learning\": 3} 句子表示为索引序列 [0, 1, 2, 3]。\nOne-hot Encoding：我们不希望词元和索引数字的映射关系干扰到模型的学习，所以需要让所有索引对于模型来说是独立的。和前面做图片分类类似，我们可以使用One-hot Encoding对词元进行编码。其实也很好理解，我们要预测下一个输出的词元是什么其实就是在做一个分类任务，所以使用One-hot Encoding是非常合适的。\n2 循环神经网络（RNN） 要学习序列模型的特征我们就需要关注到序列在时间上的积累或者说是序列的上下文关系。方法是通过一个隐状态，把序列的上下文信息存储到隐状态中，再通过前一步的隐状态和当前输入对隐状态进行更新，而输出也是通过隐状态来进行预测，这样就可以在隐状态中保存序列的上下文了。\n隐状态和隐藏层完全不同，隐状态的值在预测过程是根据输入实时更新的，训练阶段模型学习到的是从输入到隐状态的权重矩阵和偏置，以及隐状态到输出的权重矩阵和偏置，而隐藏层是在训练的时候更新，训练结束后权重就确定下来了。\n2.1 循环神经网络结构 先来看一下他的隐状态更新方程和输出方程： $$ \\mathbf{H}_t = \\phi(\\mathbf{X}_t \\mathbf{W}_{xh} + \\mathbf{H}_{t-1} \\mathbf{W}_{hh} + \\mathbf{b}_h) $$\n$$\\mathbf{O}_t = \\mathbf{H}_t \\mathbf{W}_{hq} + \\mathbf{b}_q$$\n隐状态输出相比MLP其实就是多了一项$\\mathbf{H}_{t-1} \\mathbf{W}_{hh}$，这一项把前文的信息也带到了这一次输出的预测，同时更新隐状态，也就是把当前输入也加入到隐状态中。\n下图中的$U = \\mathbf{W}_{xh}$表示输入到隐状态的变换，$V = \\mathbf{W}_{hq}$表示隐状态到输出的变换，$W = \\mathbf{W}_{hh}$表示隐状态相邻时间的变换。 这里的x，s，o都是由多个神经元构成的，如果把W去掉就相当于原来的MLP了。\n如果还是不太理解我们可以把x，s，o都展开。 红色的就是我们的输入x，蓝色的就是隐状态s，绿色的就是输出o，橙色这个全连接层就把相邻时间的隐状态联系起来了。\n模型结构其实跟MLP是一样的，只是中间的隐状态多了条从前一个时间步到当前步的变换。\n我们需要训练的参数$\\mathbf{W}_{xh}$，$\\mathbf{W}_{hq}$，$\\mathbf{W}_{hh}$在每个时间步是一样的。\n有个点需要注意，当我们批量处理数据的时候，应该是每个时间步使用一批数据更新一次权重。这个会影响到我们对输入X和输出Y做的一些转置处理，实现的时候会再提到。\n2.2 循环神经网络实现 2.2.1 读取数据 我们需要得到一个可迭代的train_iter和词表vocab，迭代器的具体实现根据任务不同也不太一样，不具体展开。\nbatch_size, num_steps = 32, 35 train_iter, vocab = d2l.load_data_time_machine(batch_size, num_steps) 上面的参数太大了，举个简单的例子\n对于 batch_size = 2， num_steps = 5， 使用顺序分区\n我们有这么一段文本 text_indices = [19, 8, 12, 5, 0, 20, 18, 0, 1, 11, 11, 5, 18]\n那我们的train_iter应该是：\nX = [[19, 8, 12, 5, 0], [20, 18, 0, 1, 11]] Y = [[ 8, 12, 5, 0, 20], [18, 0, 1, 11, 11]] X和Y的形状都是(batch_size, num_steps)\n2.2.2 定义模型 nn.RNN是Pytorch提供的高级API，只需要指定输入数量和隐状态单元数量就行。\n需要注意的是他返回的实例rnn_layer的“输出”（Y）不涉及输出层的计算： 它是指每个时间步的隐状态，这些隐状态可以用作后续输出层的输入。\nnum_hiddens = 256 # 隐状态单元数量 rnn_layer = nn.RNN(len(vocab), num_hiddens) # 构造隐状态 state = torch.zeros((1, batch_size, num_hiddens)) # 初始化状态 # 构造一个输入，来看看rnn_layer返回的是什么 X = torch.rand(size=(num_steps, batch_size, len(vocab))) Y, state_new = rnn_layer(X, state) Y.shape, state_new.shape (torch.Size([35, 32, 256]), torch.Size([1, 32, 256])) 可以发现Y的第一维和num_steps一样大，Y[i, :, :] 代表第 i 个时间步的输出，其中每一行对应一个样本的隐藏状态向量（共 num_hiddens 维）。state_new则只表示最后一步的值。\nY的形状是(num_steps, batch_size, num_hiddens)\nstate_new的形状是(1, batch_size, num_hiddens)\n明确了模型的输入后，我们就来定义模型结构了，和前面一样，我们需要定义一个RNNModel类然后实现__init__()和forward()，由于RNN有一个中间的隐状态，所以我们还需要另外实现一个函数begin_state()对其进行初始化。\nclass RNNModel(nn.Module): \"\"\"循环神经网络模型\"\"\" def __init__(self, rnn_layer, vocab_size, **kwargs): super(RNNModel, self).__init__(**kwargs) self.rnn = rnn_layer self.vocab_size = vocab_size self.num_hiddens = self.rnn.hidden_size # 如果RNN是双向的（之后将介绍），num_directions应该是2，否则应该是1 if not self.rnn.bidirectional: self.num_directions = 1 self.linear = nn.Linear(self.num_hiddens, self.vocab_size) else: self.num_directions = 2 self.linear = nn.Linear(self.num_hiddens * 2, self.vocab_size) def forward(self, inputs, state): X = F.one_hot(inputs.T.long(), self.vocab_size) X = X.to(torch.float32) Y, state = self.rnn(X, state) # 全连接层首先将Y的形状改为(时间步数*批量大小,隐藏单元数) # 它的输出形状是(时间步数*批量大小,词表大小)。 output = self.linear(Y.reshape((-1, Y.shape[-1]))) return output, state def begin_state(self, device, batch_size=1): if not isinstance(self.rnn, nn.LSTM): # nn.GRU以张量作为隐状态 return torch.zeros((self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device) else: # nn.LSTM以元组作为隐状态 return (torch.zeros(( self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device), torch.zeros(( self.num_directions * self.rnn.num_layers, batch_size, self.num_hiddens), device=device)) 可以注意到我们在前向传播的时候，先对input做了转置，才做one_hot，这是因为前面提到我们是在每个时间步处理一批数据，而不是一个数据处理所有时间步，而input的形状是(batch_size, num_step)，再做one_hot后就是(batch_size, num_step, vocab_size)了，如果我们想要一步处理全部数据，就得按第二个维度把这个X依次取出来。\n不转置虽然逻辑上也能实现逐时间步处理，但由于内存访问顺序与 PyTorch 的张量存储布局（行主序）不匹配，会造成不连续内存访问，降低缓存命中率，从而略微影响性能。\n一个简单的rnn内部对inputs的处理：\n# inputs的形状： (num_step, batch_size, vocab_size) # X的形状：(batch_size, vocab_size) for X in inputs: H = torch.tanh(torch.mm(X, W_xh) + torch.mm(H, W_hh) + b_h) Y = torch.mm(H, W_hq) + b_q outputs.append(Y) 2.2.3 预测 先把prefix字符一次遍历，来更新隐状态，这一步不会产生输出，成为预热期。\n预热期结束后，隐状态的值通常比刚开始的初始值更适合预测， 从而预测字符并输出它们。\ndef predict(prefix, num_preds, net, vocab, device): \"\"\"在prefix后面生成新字符\"\"\" state = net.begin_state(batch_size=1, device=device) outputs = [vocab[prefix[0]]] get_input = lambda: torch.tensor([outputs[-1]], device=device).reshape((1, 1)) for y in prefix[1:]: # 预热期 _, state = net(get_input(), state) outputs.append(vocab[y]) for _ in range(num_preds): # 预测num_preds步 y, state = net(get_input(), state) outputs.append(int(y.argmax(dim=1).reshape(1))) return ''.join([vocab.idx_to_token[i] for i in outputs]) 2.2.4 训练模型 训练和前面差不多，只是需要注意Y和y_hat的对齐，以及梯度爆炸的问题。\ndef train_epoch(net, train_iter, loss, updater, device, use_random_iter): state, timer = None, d2l.Timer() metric = d2l.Accumulator(2) # 训练损失之和,词元数量 for X, Y in train_iter: if state is None or use_random_iter: # 在第一次迭代或使用随机抽样时初始化state state = net.begin_state(batch_size=X.shape[0], device=device) else: if isinstance(net, nn.Module) and not isinstance(state, tuple): # state对于nn.GRU是个张量 state.detach_() else: # state对于nn.LSTM或对于我们从零开始实现的模型是个张量 for s in state: s.detach_() y = Y.T.reshape(-1) # 为了和y_hat对齐 X, y = X.to(device), y.to(device) y_hat, state = net(X, state) l = loss(y_hat, y.long()).mean() if isinstance(updater, torch.optim.Optimizer): updater.zero_grad() l.backward() grad_clipping(net, 1) updater.step() else: l.backward() grad_clipping(net, 1) # 因为已经调用了mean函数 updater(batch_size=1) metric.add(l * y.numel(), y.numel()) return math.exp(metric[0] / metric[1]), metric[1] / timer.stop() def train(net, train_iter, vocab, lr, num_epochs, device, use_random_iter=False): loss = nn.CrossEntropyLoss() animator = d2l.Animator(xlabel='epoch', ylabel='perplexity', legend=['train'], xlim=[10, num_epochs]) # 初始化 if isinstance(net, nn.Module): updater = torch.optim.SGD(net.parameters(), lr) else: updater = lambda batch_size: d2l.sgd(net.params, lr, batch_size) predict = lambda prefix: predict(prefix, 50, net, vocab, device) # 训练和预测 for epoch in range(num_epochs): ppl, speed = train_epoch( net, train_iter, loss, updater, device, use_random_iter) if (epoch + 1) % 10 == 0: print(predict('time traveller')) animator.add(epoch + 1, [ppl]) print(f'困惑度 {ppl:.1f}, {speed:.1f} 词元/秒 {str(device)}') print(predict('time traveller')) print(predict('traveller')) device = d2l.try_gpu() net = RNNModel(rnn_layer, vocab_size=len(vocab)) net = net.to(device) num_epochs, lr = 500, 1 train(net, train_iter, vocab, lr, num_epochs, device) 因为在num_step步里面，梯度会一直累计，就很容易出现梯度爆炸的问题，所以使用了一个grad_clipping。\n他是通过将梯度$\\mathbf{g}$投影回给定半径（例如$\\theta$）的球来裁剪梯度$\\mathbf{g}$。 如下式： $$\\mathbf{g} \\leftarrow \\min\\left(1, \\frac{\\theta}{|\\mathbf{g}|}\\right) \\mathbf{g}.$$\ndef grad_clipping(net, theta): \"\"\"裁剪梯度\"\"\" if isinstance(net, nn.Module): params = [p for p in net.parameters() if p.requires_grad] else: params = net.params norm = torch.sqrt(sum(torch.sum((p.grad ** 2)) for p in params)) if norm \u003e theta: for param in params: param.grad[:] *= theta / norm 3 单元机制改进 对于RNN,如果把步数变得很大，就很容易出现梯度爆炸的问题，但是步数小又无法获得到比较早期的信息。\n对于这类问题，最早的方法是“长短期记忆”（long-short-term memory，LSTM）。\n门控循环单元（gated recurrent unit，GRU）是一个稍微简化的变体，通常能够提供同等的效果， 并且计算的速度明显更快。\n3.1 门控循环单元（GRU） 3.1.1 GRU原理 重置门：控制“可能还想记住”的过去状态的数量\n$$ \\mathbf{R}_t = \\sigma(\\mathbf{X}_t \\mathbf{W}_{xr} + \\mathbf{H}_{t-1} \\mathbf{W}_{hr} + \\mathbf{b}_r) $$ 更新门：允许我们控制新状态中有多少比例来自旧状态\n$$ \\mathbf{Z}_t = \\sigma(\\mathbf{X}_t \\mathbf{W}_{xz} + \\mathbf{H}_{t-1} \\mathbf{W}_{hz} + \\mathbf{b}_z) $$ 候选隐状态：由被重置门控制的过去状态和当前输入计算得到，当重置门很接近0的时候就基本只取决于当前输入，相当于状态被“重置”了\n$$ \\tilde{\\mathbf{H}}_t = \\tanh(\\mathbf{X}_t \\mathbf{W}_{xh} + \\left(\\mathbf{R}_t \\odot \\mathbf{H}_{t-1}\\right) \\mathbf{W}_{hh} + \\mathbf{b}_h) $$ 隐状态：由更新门分配上一时间隐状态和当前候选隐状态的比例，得到新的隐状态，如果更新门很接近0就相当于新的隐状态基本来自于候选隐状态，也就是隐状态被“更新”了 $$ \\mathbf{H}_t = \\mathbf{Z}_t \\odot \\mathbf{H}_{t-1} + (1 - \\mathbf{Z}_t) \\odot \\tilde{\\mathbf{H}}_t $$\n总结：\n重置门有助于捕获序列中的短期依赖关系； 更新门有助于捕获序列中的长期依赖关系。 3.1.2 GRU实现 Pytorch已经给我们实现好了，直接把nn.RNN改成nn.GRU就好了\nnum_inputs = vocab_size gru_layer = nn.GRU(num_inputs, num_hiddens) model = RNNModel(gru_layer, len(vocab)) model = model.to(device) train(model, train_iter, vocab, lr, num_epochs, device) 3.2 长短期记忆网络（LSTM） 3.2.1 LSTM原理 多加了一条“线”——记忆元$\\mathbf{C}_t$用来储存长期信息\n原理是通过隐状态和当前输入先决定输入门$\\mathbf{I}_t$、遗忘门$\\mathbf{F}_t$、输出门$\\mathbf{O}_t$和候选记忆元$\\tilde{\\mathbf{C}}_t$\n然后根据遗忘门、输入门和之前的记忆元$\\tilde{\\mathbf{C}}_{t-1}$得到新的记忆元$\\mathbf{C}_t$\n最后根据新的记忆元和输出门来更新隐状态$\\mathbf{H}_t$，并预测输出。\n其中：\n输入门$\\mathbf{I}_t$：控制采用多少来自$\\tilde{\\mathbf{C}}_t$的新数据\n$$\\mathbf{I}_t = \\sigma(\\mathbf{X}_t \\mathbf{W}_{xi} + \\mathbf{H}_{t-1} \\mathbf{W}_{hi} + \\mathbf{b}_i)$$\n遗忘门$\\mathbf{F}_t$：控制保留多少过去的$\\mathbf{C}_{t-1}$记忆元\n$$\\mathbf{F}_t = \\sigma(\\mathbf{X}_t \\mathbf{W}_{xf} + \\mathbf{H}_{t-1} \\mathbf{W}_{hf} + \\mathbf{b}_f)$$\n输出门$\\mathbf{O}_t$：决定预测部分有多少记忆信息\n$$\\mathbf{O}_t = \\sigma(\\mathbf{X}_t \\mathbf{W}_{xo} + \\mathbf{H}_{t-1} \\mathbf{W}_{ho} + \\mathbf{b}_o)$$ 候选记忆元$\\tilde{\\mathbf{C}}_t$：相当于提取现在和和之前状态需要记忆的信息\n$$ \\tilde{\\mathbf{C}}_t = \\text{tanh}(\\mathbf{X}_t \\mathbf{W}_{xc} + \\mathbf{H}_{t-1} \\mathbf{W}_{hc} + \\mathbf{b}_c) $$ 记忆元$\\mathbf{C}_t$：记忆过去的信息，由遗忘门和输入门分别控制旧、新信息比例 $$\\mathbf{C}_t = \\mathbf{F}_t \\odot \\mathbf{C}_{t-1} + \\mathbf{I}_t \\odot \\tilde{\\mathbf{C}}_t$$ 隐状态$\\mathbf{H}_t$：用来预测输出和控制下一个时间各个门的状态，由于遗忘门和输入门和不一定为1，因此需要对$\\mathbf{C}_t$再使用一次tanh使其取值落到(-1,1) $$ \\mathbf{H}_t = \\mathbf{O}_t \\odot \\tanh(\\mathbf{C}_t) $$\n3.2.2 LSTM实现 和GRU一样，Pytorch也有内部实现\nlstm_layer = nn.LSTM(num_inputs, num_hiddens) 其他的还是和RNN差不多，需要注意的是state不再是一个元素，而是变成了一个元组(H, C)\n4 网络结构扩展 前面都是只有一个单向隐藏层的循环神经网络，但是其实还可以对网络的结构进行调整，比如加深或者增加一个方向，于是就有深度循环神经网络和双向循环神经网络。\n4.1 深度循环神经网络 公式：\n$$ \\mathbf{H}_t^{(l)} = \\phi_l(\\mathbf{H}_t^{(l-1)} \\mathbf{W}_{xh}^{(l)} + \\mathbf{H}_{t-1}^{(l)} \\mathbf{W}_{hh}^{(l)} + \\mathbf{b}_h^{(l)}) $$ 实现：\nvocab_size, num_hiddens, num_layers = len(vocab), 256, 2 num_inputs = vocab_size device = d2l.try_gpu() lstm_layer = nn.LSTM(num_inputs, num_hiddens, num_layers) model = RNNModel(lstm_layer, len(vocab)) model = model.to(device) 只需要指定层数就行，RNN，GRU，LSTM都可以使用。\n4.2 双向循环神经网络 除了过去的信息我们还可以利用未来的信息，这就是双向循环神经网络\n但是他只能用来解决补充的问题，对于预测问题，由于没有未来信息，所以效果很差\n其实就是两个rnn，一正一反就可以了\n公式：\n$$ \\begin{aligned} \\overrightarrow{\\mathbf{H}}_t \u0026= \\phi(\\mathbf{X}_t \\mathbf{W}_{xh}^{(f)} + \\overrightarrow{\\mathbf{H}}_{t-1} \\mathbf{W}_{hh}^{(f)} + \\mathbf{b}_h^{(f)})\\\\ \\overleftarrow{\\mathbf{H}}_t \u0026= \\phi(\\mathbf{X}_t \\mathbf{W}_{xh}^{(b)} + \\overleftarrow{\\mathbf{H}}_{t+1} \\mathbf{W}_{hh}^{(b)} + \\mathbf{b}_h^{(b)}) \\end{aligned} $$\n双向层的使用在实践中非常少，并且仅仅应用于部分场合。 例如，填充缺失的单词、词元注释（例如，用于命名实体识别） 以及作为序列处理流水线中的一个步骤对序列进行编码（例如，用于机器翻译）。\n5 序列到序列学习（Seq2Seq） 机器翻译中的输入序列和输出序列都是长度可变的。我们可以使用两个循环神经网络的编码器和解码器结构来解决这种序列到序列的任务。\n5.1 编码器-解码器架构 首先要对输入序列进行处理，使用额外的特定词元，例如用于将序列填充到相同长度的填充词元（“”）， 以及序列的开始词元（“”）和结束词元（“”）。 把处理完的输入序列输入到编码器中，用来更新其隐状态，把最后的隐状态传给解码器，\n然后用特定的“”表示序列开始词元进行预测，注意！为了进一步包含经过编码的输入序列的信息，上下文变量在所有的时间步与解码器的输入进行拼接（concatenate）。直到最后生成的“”词元说明完成了序列输出工作。\n编码器-解码器就相当于是直接读取了全部的句子，之后再映射到另一个句子。而如果单纯使用RNN，那么在读输入的同时它的输出空间也在被训练，也就是还没理解完一个完整的句子就开始预测输出内容了。\n编码器：\nclass Encoder(nn.Module): \"\"\"编码器-解码器架构的基本编码器接口\"\"\" def __init__(self, **kwargs): super(Encoder, self).__init__(**kwargs) def forward(self, X, *args): raise NotImplementedError class Seq2SeqEncoder(Encoder): \"\"\"用于序列到序列学习的循环神经网络编码器\"\"\" def __init__(self, vocab_size, embed_size, num_hiddens, num_layers, dropout=0, **kwargs): super(Seq2SeqEncoder, self).__init__(**kwargs) # 嵌入层 self.embedding = nn.Embedding(vocab_size, embed_size) self.rnn = nn.GRU(embed_size, num_hiddens, num_layers, dropout=dropout) def forward(self, X, *args): # 输出'X'的形状：(batch_size,num_steps,embed_size) X = self.embedding(X) # 在循环神经网络模型中，第一个轴对应于时间步 X = X.permute(1, 0, 2) # 如果未提及状态，则默认为0 output, state = self.rnn(X) # output的形状:(num_steps,batch_size,num_hiddens) # state的形状:(num_layers,batch_size,num_hiddens) return output, state 解码器：\nclass Decoder(nn.Module): \"\"\"编码器-解码器架构的基本解码器接口\"\"\" def __init__(self, **kwargs): super(Decoder, self).__init__(**kwargs) def init_state(self, enc_outputs, *args): raise NotImplementedError def forward(self, X, state): raise NotImplementedError class Seq2SeqDecoder(Decoder): \"\"\"用于序列到序列学习的循环神经网络解码器\"\"\" def __init__(self, vocab_size, embed_size, num_hiddens, num_layers, dropout=0, **kwargs): super(Seq2SeqDecoder, self).__init__(**kwargs) self.embedding = nn.Embedding(vocab_size, embed_size) self.rnn = nn.GRU(embed_size + num_hiddens, num_hiddens, num_layers, dropout=dropout) self.dense = nn.Linear(num_hiddens, vocab_size) def init_state(self, enc_outputs, *args): return enc_outputs[1] def forward(self, X, state): # 输出'X'的形状：(batch_size,num_steps,embed_size) X = self.embedding(X).permute(1, 0, 2) # 广播context，使其具有与X相同的num_steps context = state[-1].repeat(X.shape[0], 1, 1) X_and_context = torch.cat((X, context), 2) output, state = self.rnn(X_and_context, state) output = self.dense(output).permute(1, 0, 2) # output的形状:(batch_size,num_steps,vocab_size) # state的形状:(num_layers,batch_size,num_hiddens) return output, state 这里使用了嵌入层（embedding layer）来获得输入序列中每个词元的特征向量。\n嵌入层的权重是一个矩阵，其行数等于输入词表的大小（vocab_size），其列数等于特征向量的维度（embed_size）。 embedding layer的参数（权重矩阵）是可以学习的\n为什么不使用one-hot encoding？因为长度太大的话，计算量和参数量爆炸；且无法表示token之间的关联性。\n5.2 损失函数 因为我们有进行一些填充，所以在计算损失函数的时候要屏蔽掉那些被填充的项,\n然后在算一个batch的时候就根据长度加权求加权平均损失。 其他的就是正常的oftmax交叉熵。\ndef sequence_mask(X, valid_len, value=0): \"\"\"在序列中屏蔽不相关的项\"\"\" maxlen = X.size(1) mask = torch.arange((maxlen), dtype=torch.float32, device=X.device)[None, :] \u003c valid_len[:, None] X[~mask] = value return X X = torch.tensor([[1, 2, 3], [4, 5, 6]]) sequence_mask(X, torch.tensor([1, 2])) class MaskedSoftmaxCELoss(nn.CrossEntropyLoss): \"\"\"带遮蔽的softmax交叉熵损失函数\"\"\" # pred的形状：(batch_size,num_steps,vocab_size) # label的形状：(batch_size,num_steps) # valid_len的形状：(batch_size,) def forward(self, pred, label, valid_len): weights = torch.ones_like(label) weights = sequence_mask(weights, valid_len) self.reduction='none' # 不要自动对batch求平均，返回每个元素的独立损失，后面手动加权 unweighted_loss = super(MaskedSoftmaxCELoss, self).forward( pred.permute(0, 2, 1), label) weighted_loss = (unweighted_loss * weights).mean(dim=1) return weighted_loss 5.3 模型训练 def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device): \"\"\"训练序列到序列模型\"\"\" def xavier_init_weights(m): if type(m) == nn.Linear: nn.init.xavier_uniform_(m.weight) if type(m) == nn.GRU: for param in m._flat_weights_names: if \"weight\" in param: nn.init.xavier_uniform_(m._parameters[param]) net.apply(xavier_init_weights) net.to(device) optimizer = torch.optim.Adam(net.parameters(), lr=lr) loss = MaskedSoftmaxCELoss() net.train() animator = d2l.Animator(xlabel='epoch', ylabel='loss', xlim=[10, num_epochs]) for epoch in range(num_epochs): timer = d2l.Timer() metric = d2l.Accumulator(2) # 训练损失总和，词元数量 for batch in data_iter: optimizer.zero_grad() X, X_valid_len, Y, Y_valid_len = [x.to(device) for x in batch] bos = torch.tensor([tgt_vocab['']] * Y.shape[0], device=device).reshape(-1, 1) dec_input = torch.cat([bos, Y[:, :-1]], 1) # 强制教学 Y_hat, _ = net(X, dec_input, X_valid_len) l = loss(Y_hat, Y, Y_valid_len) l.sum().backward() # 损失函数的标量进行“反向传播” d2l.grad_clipping(net, 1) num_tokens = Y_valid_len.sum() optimizer.step() with torch.no_grad(): metric.add(l.sum(), num_tokens) if (epoch + 1) % 10 == 0: animator.add(epoch + 1, (metric[0] / metric[1],)) print(f'loss {metric[0] / metric[1]:.3f}, {metric[1] / timer.stop():.1f} ' f'tokens/sec on {str(device)}') 5.4 模型预测 def predict_seq2seq(net, src_sentence, src_vocab, tgt_vocab, num_steps, device, save_attention_weights=False): \"\"\"序列到序列模型的预测\"\"\" # 在预测时将net设置为评估模式 net.eval() src_tokens = src_vocab[src_sentence.lower().split(' ')] + [ src_vocab['']] enc_valid_len = torch.tensor([len(src_tokens)], device=device) src_tokens = d2l.truncate_pad(src_tokens, num_steps, src_vocab['']) # 添加批量轴 enc_X = torch.unsqueeze( torch.tensor(src_tokens, dtype=torch.long, device=device), dim=0) enc_outputs = net.encoder(enc_X, enc_valid_len) dec_state = net.decoder.init_state(enc_outputs, enc_valid_len) # 添加批量轴 dec_X = torch.unsqueeze(torch.tensor( [tgt_vocab['']], dtype=torch.long, device=device), dim=0) output_seq, attention_weight_seq = [], [] for _ in range(num_steps): Y, dec_state = net.decoder(dec_X, dec_state) # 我们使用具有预测最高可能性的词元，作为解码器在下一时间步的输入 dec_X = Y.argmax(dim=2) pred = dec_X.squeeze(dim=0).type(torch.int32).item() # 保存注意力权重（稍后讨论） if save_attention_weights: attention_weight_seq.append(net.decoder.attention_weights) # 一旦序列结束词元被预测，输出序列的生成就完成了 if pred == tgt_vocab['']: break output_seq.append(pred) return ' '.join(tgt_vocab.to_tokens(output_seq)), attention_weight_seq 5.5 预测序列的评估 我们可以通过与真实的标签序列进行比较来评估预测序列。\nBLEU（bilingual evaluation understudy） 最先是用于评估机器翻译的结果， 但现在它已经被广泛用于测量许多应用的输出序列的质量。\n$$ \\exp\\left(\\min\\left(0, 1 - \\frac{\\mathrm{len}_{\\text{label}}}{\\mathrm{len}_{\\text{pred}}}\\right)\\right) \\prod_{n=1}^k p_n^{1/2^n}, $$ 当预测序列与标签序列完全相同时，BLEU为1，越小表示差别越大。\ndef bleu(pred_seq, label_seq, k): \"\"\"计算BLEU\"\"\" pred_tokens, label_tokens = pred_seq.split(' '), label_seq.split(' ') len_pred, len_label = len(pred_tokens), len(label_tokens) score = math.exp(min(0, 1 - len_label / len_pred)) for n in range(1, k + 1): num_matches, label_subs = 0, collections.defaultdict(int) for i in range(len_label - n + 1): label_subs[' '.join(label_tokens[i: i + n])] += 1 for i in range(len_pred - n + 1): if label_subs[' '.join(pred_tokens[i: i + n])] \u003e 0: num_matches += 1 label_subs[' '.join(pred_tokens[i: i + n])] -= 1 score *= math.pow(num_matches / (len_pred - n + 1), math.pow(0.5, n)) return score ",
+  "wordCount" : "7632",
+  "inLanguage": "zh",
+  "image":"https://eivver.github.io/img/rnn/RNN_.png","datePublished": "2025-10-10T13:18:47+08:00",
+  "dateModified": "2025-10-10T13:18:47+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/rnn/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                循环神经网络
+            </h1>
+            <div class="post-description">
+                循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。
+            </div>
+            <div class="post-meta">创建:&nbsp;<span title='2025-10-10 13:18:47 +0800 CST'>2025-10-10</span>&nbsp;|&nbsp;字数:&nbsp;7632字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> 
+<figure class="entry-cover1"><img loading="lazy" src="https://eivver.github.io/img/rnn/RNN_.png" alt="">
+        
+</figure><aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e5%ba%8f%e5%88%97%e6%a8%a1%e5%9e%8b" aria-label="1 序列模型">1 序列模型</a><ul>
+                        
+                <li>
+                    <a href="#11-%e5%ba%8f%e5%88%97%e6%a8%a1%e5%9e%8b%e7%89%b9%e5%be%81" aria-label="1.1 序列模型特征">1.1 序列模型特征</a></li>
+                <li>
+                    <a href="#12-%e6%96%87%e6%9c%ac%e5%ba%8f%e5%88%97%e5%a4%84%e7%90%86" aria-label="1.2 文本序列处理">1.2 文本序列处理</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e5%be%aa%e7%8e%af%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9crnn" aria-label="2 循环神经网络（RNN）">2 循环神经网络（RNN）</a><ul>
+                        
+                <li>
+                    <a href="#21-%e5%be%aa%e7%8e%af%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e7%bb%93%e6%9e%84" aria-label="2.1 循环神经网络结构">2.1 循环神经网络结构</a></li>
+                <li>
+                    <a href="#22-%e5%be%aa%e7%8e%af%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e5%ae%9e%e7%8e%b0" aria-label="2.2 循环神经网络实现">2.2 循环神经网络实现</a><ul>
+                        
+                <li>
+                    <a href="#221-%e8%af%bb%e5%8f%96%e6%95%b0%e6%8d%ae" aria-label="2.2.1 读取数据">2.2.1 读取数据</a></li>
+                <li>
+                    <a href="#222-%e5%ae%9a%e4%b9%89%e6%a8%a1%e5%9e%8b" aria-label="2.2.2 定义模型">2.2.2 定义模型</a></li>
+                <li>
+                    <a href="#223-%e9%a2%84%e6%b5%8b" aria-label="2.2.3 预测">2.2.3 预测</a></li>
+                <li>
+                    <a href="#224-%e8%ae%ad%e7%bb%83%e6%a8%a1%e5%9e%8b" aria-label="2.2.4 训练模型">2.2.4 训练模型</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#3-%e5%8d%95%e5%85%83%e6%9c%ba%e5%88%b6%e6%94%b9%e8%bf%9b" aria-label="3 单元机制改进">3 单元机制改进</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%97%a8%e6%8e%a7%e5%be%aa%e7%8e%af%e5%8d%95%e5%85%83gru" aria-label="3.1 门控循环单元（GRU）">3.1 门控循环单元（GRU）</a><ul>
+                        
+                <li>
+                    <a href="#311-gru%e5%8e%9f%e7%90%86" aria-label="3.1.1 GRU原理">3.1.1 GRU原理</a></li>
+                <li>
+                    <a href="#312-gru%e5%ae%9e%e7%8e%b0" aria-label="3.1.2 GRU实现">3.1.2 GRU实现</a></li></ul>
+                </li>
+                <li>
+                    <a href="#32-%e9%95%bf%e7%9f%ad%e6%9c%9f%e8%ae%b0%e5%bf%86%e7%bd%91%e7%bb%9clstm" aria-label="3.2 长短期记忆网络（LSTM）">3.2 长短期记忆网络（LSTM）</a><ul>
+                        
+                <li>
+                    <a href="#321-lstm%e5%8e%9f%e7%90%86" aria-label="3.2.1 LSTM原理">3.2.1 LSTM原理</a></li>
+                <li>
+                    <a href="#322-lstm%e5%ae%9e%e7%8e%b0" aria-label="3.2.2 LSTM实现">3.2.2 LSTM实现</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e7%bd%91%e7%bb%9c%e7%bb%93%e6%9e%84%e6%89%a9%e5%b1%95" aria-label="4 网络结构扩展">4 网络结构扩展</a><ul>
+                        
+                <li>
+                    <a href="#41-%e6%b7%b1%e5%ba%a6%e5%be%aa%e7%8e%af%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c" aria-label="4.1 深度循环神经网络">4.1 深度循环神经网络</a></li>
+                <li>
+                    <a href="#42-%e5%8f%8c%e5%90%91%e5%be%aa%e7%8e%af%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c" aria-label="4.2 双向循环神经网络">4.2 双向循环神经网络</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-%e5%ba%8f%e5%88%97%e5%88%b0%e5%ba%8f%e5%88%97%e5%ad%a6%e4%b9%a0seq2seq" aria-label="5 序列到序列学习（Seq2Seq）">5 序列到序列学习（Seq2Seq）</a><ul>
+                        
+                <li>
+                    <a href="#51-%e7%bc%96%e7%a0%81%e5%99%a8-%e8%a7%a3%e7%a0%81%e5%99%a8%e6%9e%b6%e6%9e%84" aria-label="5.1 编码器-解码器架构">5.1 编码器-解码器架构</a></li>
+                <li>
+                    <a href="#52-%e6%8d%9f%e5%a4%b1%e5%87%bd%e6%95%b0" aria-label="5.2 损失函数">5.2 损失函数</a></li>
+                <li>
+                    <a href="#53-%e6%a8%a1%e5%9e%8b%e8%ae%ad%e7%bb%83" aria-label="5.3 模型训练">5.3 模型训练</a></li>
+                <li>
+                    <a href="#54-%e6%a8%a1%e5%9e%8b%e9%a2%84%e6%b5%8b" aria-label="5.4 模型预测">5.4 模型预测</a></li>
+                <li>
+                    <a href="#55-%e9%a2%84%e6%b5%8b%e5%ba%8f%e5%88%97%e7%9a%84%e8%af%84%e4%bc%b0" aria-label="5.5 预测序列的评估">5.5 预测序列的评估</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><h2 id="1-序列模型">1 序列模型<a hidden class="anchor" aria-hidden="true" href="#1-序列模型">#</a></h2>
+<p>在现实世界中，数据并不总是由相互独立的样本组成。许多任务涉及<strong>时间或顺序相关的数据</strong>，例如：</p>
+<ul>
+<li>一段语音信号随时间变化；</li>
+<li>一句自然语言由前后相关的词构成；</li>
+<li>股票价格、传感器读数、交通流量等时间序列。</li>
+</ul>
+<h3 id="11-序列模型特征">1.1 序列模型特征<a hidden class="anchor" aria-hidden="true" href="#11-序列模型特征">#</a></h3>
+<p>这类数据通常具有<strong>时序依赖性（temporal dependency）</strong>——即当前时刻的状态往往受到过去输入的影响。</p>
+<p>然而，传统的多层感知机（MLP）或卷积神经网络（CNN）假设输入之间是独立的，因此很难捕捉时间维度上的依赖关系：</p>
+<ul>
+<li>MLP 会将输入展平成一维向量，完全丢失序列的前后顺序；</li>
+<li>CNN 虽能在空间上提取局部特征，但并不具备随时间“记忆”的能力。</li>
+</ul>
+<p>为了建模这类数据，我们需要一种能够<strong>在时间上累积信息、保留上下文关系</strong>的模型。</p>
+<h3 id="12-文本序列处理">1.2 文本序列处理<a hidden class="anchor" aria-hidden="true" href="#12-文本序列处理">#</a></h3>
+<p>对于文本我们通常的处理方式是将字符串拆成字符或者单词，然后建立一个词表进行映射，模型的输入输出都使用数字索引序列进行操作。</p>
+<p>词元(token)：将字符串拆成字符或者单词的操作是tokenize，这里的字符或者单词也叫词元(token)，它是文本的基本单位。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>&#34;I love deep learning&#34; → [&#34;I&#34;, &#34;love&#34;, &#34;deep&#34;, &#34;learning&#34;]
+</span></span></code></pre></div><p>词表（vocabulary）：因为词元都是字符串，模型不容易处理，所以需要构建词元和数字的映射，词表就是用来存储这个映射的，通常会把出现频率高的词元赋予较小的数字索引，并且会删除一部分出现频率低的词元。<br>
+除了这些还会把词表中不存在或已删除的任何词元都将映射到一个特定的未知词元“&lt;unk&gt;”。<br>
+还可以选择增加一个列表，用于保存那些被保留的词元， 例如：填充词元（“&lt;pad&gt;”）； 序列开始词元（“&lt;bos&gt;”）； 序列结束词元（“&lt;eos&gt;”）</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>{&#34;I&#34;: 0, &#34;love&#34;: 1, &#34;deep&#34;: 2, &#34;learning&#34;: 3}
+</span></span></code></pre></div><p>句子表示为索引序列 <code>[0, 1, 2, 3]</code>。</p>
+<p>One-hot Encoding：我们不希望词元和索引数字的映射关系干扰到模型的学习，所以需要让所有索引对于模型来说是独立的。和前面做图片分类类似，我们可以使用One-hot Encoding对词元进行编码。其实也很好理解，我们要预测下一个输出的词元是什么其实就是在做一个分类任务，所以使用One-hot Encoding是非常合适的。</p>
+<h2 id="2-循环神经网络rnn">2 循环神经网络（RNN）<a hidden class="anchor" aria-hidden="true" href="#2-循环神经网络rnn">#</a></h2>
+<p>要学习序列模型的特征我们就需要关注到序列在时间上的积累或者说是序列的上下文关系。方法是通过一个隐状态，把序列的上下文信息存储到隐状态中，再通过前一步的隐状态和当前输入对隐状态进行更新，而输出也是通过隐状态来进行预测，这样就可以在隐状态中保存序列的上下文了。<br>
+<strong>隐状态和隐藏层完全不同</strong>，隐状态的值在预测过程是根据输入实时更新的，训练阶段模型学习到的是从输入到隐状态的权重矩阵和偏置，以及隐状态到输出的权重矩阵和偏置，而隐藏层是在训练的时候更新，训练结束后权重就确定下来了。</p>
+<h3 id="21-循环神经网络结构">2.1 循环神经网络结构<a hidden class="anchor" aria-hidden="true" href="#21-循环神经网络结构">#</a></h3>
+<p>先来看一下他的隐状态更新方程和输出方程：
+$$
+\mathbf{H}_t = \phi(\mathbf{X}_t \mathbf{W}_{xh} + \mathbf{H}_{t-1} \mathbf{W}_{hh}  + \mathbf{b}_h)
+$$</p>
+<p>$$\mathbf{O}_t = \mathbf{H}_t \mathbf{W}_{hq} + \mathbf{b}_q$$</p>
+<p>隐状态输出相比MLP其实就是多了一项$\mathbf{H}_{t-1} \mathbf{W}_{hh}$，这一项把前文的信息也带到了这一次输出的预测，同时更新隐状态，也就是把当前输入也加入到隐状态中。<br>
+下图中的$U = \mathbf{W}_{xh}$表示输入到隐状态的变换，$V = \mathbf{W}_{hq}$表示隐状态到输出的变换，$W = \mathbf{W}_{hh}$表示隐状态相邻时间的变换。
+<img alt="RNN" loading="lazy" src="/img/rnn/rnn.png">
+这里的x，s，o都是由多个神经元构成的，如果把W去掉就相当于原来的MLP了。<br>
+如果还是不太理解我们可以把x，s，o都展开。
+<img alt="RNN2" loading="lazy" src="/img/rnn/rnn2.png">
+红色的就是我们的输入x，蓝色的就是隐状态s，绿色的就是输出o，橙色这个全连接层就把相邻时间的隐状态联系起来了。<br>
+模型结构其实跟MLP是一样的，只是中间的隐状态多了条从前一个时间步到当前步的变换。<br>
+我们需要训练的参数$\mathbf{W}_{xh}$，$\mathbf{W}_{hq}$，$\mathbf{W}_{hh}$在每个时间步是一样的。</p>
+<p>有个点需要注意，当我们批量处理数据的时候，应该是<strong>每个时间步使用一批数据更新一次权重</strong>。这个会影响到我们对输入X和输出Y做的一些转置处理，实现的时候会再提到。</p>
+<h3 id="22-循环神经网络实现">2.2 循环神经网络实现<a hidden class="anchor" aria-hidden="true" href="#22-循环神经网络实现">#</a></h3>
+<h4 id="221-读取数据">2.2.1 读取数据<a hidden class="anchor" aria-hidden="true" href="#221-读取数据">#</a></h4>
+<p>我们需要得到一个可迭代的train_iter和词表vocab，迭代器的具体实现根据任务不同也不太一样，不具体展开。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>batch_size, num_steps <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">35</span>
+</span></span><span style="display:flex;"><span>train_iter, vocab <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>load_data_time_machine(batch_size, num_steps)
+</span></span></code></pre></div><p>上面的参数太大了，举个简单的例子<br>
+对于 batch_size = 2， num_steps = 5， 使用顺序分区<br>
+我们有这么一段文本 text_indices = [19, 8, 12, 5, 0, 20, 18, 0, 1, 11, 11, 5, 18]<br>
+那我们的train_iter应该是：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>X =
+</span></span><span style="display:flex;"><span>[[19,  8, 12,  5,  0],
+</span></span><span style="display:flex;"><span> [20, 18,  0,  1, 11]]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Y =
+</span></span><span style="display:flex;"><span>[[ 8, 12,  5,  0, 20],
+</span></span><span style="display:flex;"><span> [18,  0,  1, 11, 11]]
+</span></span></code></pre></div><p><strong>X和Y的形状都是(batch_size, num_steps)</strong></p>
+<h4 id="222-定义模型">2.2.2 定义模型<a hidden class="anchor" aria-hidden="true" href="#222-定义模型">#</a></h4>
+<p><code>nn.RNN</code>是Pytorch提供的高级API，只需要指定输入数量和隐状态单元数量就行。<br>
+需要注意的是他返回的实例rnn_layer的“输出”（Y）不涉及输出层的计算： 它是指每个时间步的隐状态，这些隐状态可以用作后续输出层的输入。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>num_hiddens <span style="color:#f92672">=</span> <span style="color:#ae81ff">256</span>                                       <span style="color:#75715e"># 隐状态单元数量</span>
+</span></span><span style="display:flex;"><span>rnn_layer <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>RNN(len(vocab), num_hiddens)             <span style="color:#75715e"># 构造隐状态</span>
+</span></span><span style="display:flex;"><span>state <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>zeros((<span style="color:#ae81ff">1</span>, batch_size, num_hiddens))       <span style="color:#75715e"># 初始化状态</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 构造一个输入，来看看rnn_layer返回的是什么</span>
+</span></span><span style="display:flex;"><span>X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>rand(size<span style="color:#f92672">=</span>(num_steps, batch_size, len(vocab))) 
+</span></span><span style="display:flex;"><span>Y, state_new <span style="color:#f92672">=</span> rnn_layer(X, state)
+</span></span><span style="display:flex;"><span>Y<span style="color:#f92672">.</span>shape, state_new<span style="color:#f92672">.</span>shape
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>(torch.Size([35, 32, 256]), torch.Size([1, 32, 256]))
+</span></span></code></pre></div><p>可以发现Y的第一维和num_steps一样大，<code>Y[i, :, :] </code>代表第 i 个时间步的输出，其中每一行对应一个样本的隐藏状态向量（共 num_hiddens 维）。state_new则只表示最后一步的值。<br>
+Y的形状是<code>(num_steps, batch_size, num_hiddens)</code><br>
+state_new的形状是<code>(1, batch_size, num_hiddens)</code></p>
+<p>明确了模型的输入后，我们就来定义模型结构了，和前面一样，我们需要定义一个RNNModel类然后实现<code>__init__()</code>和<code>forward()</code>，由于RNN有一个中间的隐状态，所以我们还需要另外实现一个函数<code>begin_state()</code>对其进行初始化。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RNNModel</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;循环神经网络模型&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, rnn_layer, vocab_size, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>        super(RNNModel, self)<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>rnn <span style="color:#f92672">=</span> rnn_layer
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>vocab_size <span style="color:#f92672">=</span> vocab_size
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>num_hiddens <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rnn<span style="color:#f92672">.</span>hidden_size
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 如果RNN是双向的（之后将介绍），num_directions应该是2，否则应该是1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> self<span style="color:#f92672">.</span>rnn<span style="color:#f92672">.</span>bidirectional:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>num_directions <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>linear <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(self<span style="color:#f92672">.</span>num_hiddens, self<span style="color:#f92672">.</span>vocab_size)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>num_directions <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>linear <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(self<span style="color:#f92672">.</span>num_hiddens <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>, self<span style="color:#f92672">.</span>vocab_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, inputs, state):
+</span></span><span style="display:flex;"><span>        X <span style="color:#f92672">=</span> F<span style="color:#f92672">.</span>one_hot(inputs<span style="color:#f92672">.</span>T<span style="color:#f92672">.</span>long(), self<span style="color:#f92672">.</span>vocab_size)
+</span></span><span style="display:flex;"><span>        X <span style="color:#f92672">=</span> X<span style="color:#f92672">.</span>to(torch<span style="color:#f92672">.</span>float32)
+</span></span><span style="display:flex;"><span>        Y, state <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rnn(X, state)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 全连接层首先将Y的形状改为(时间步数*批量大小,隐藏单元数)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 它的输出形状是(时间步数*批量大小,词表大小)。</span>
+</span></span><span style="display:flex;"><span>        output <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>linear(Y<span style="color:#f92672">.</span>reshape((<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, Y<span style="color:#f92672">.</span>shape[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> output, state
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">begin_state</span>(self, device, batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> isinstance(self<span style="color:#f92672">.</span>rnn, nn<span style="color:#f92672">.</span>LSTM):
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># nn.GRU以张量作为隐状态</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>  torch<span style="color:#f92672">.</span>zeros((self<span style="color:#f92672">.</span>num_directions <span style="color:#f92672">*</span> self<span style="color:#f92672">.</span>rnn<span style="color:#f92672">.</span>num_layers,
+</span></span><span style="display:flex;"><span>                                 batch_size, self<span style="color:#f92672">.</span>num_hiddens),
+</span></span><span style="display:flex;"><span>                                device<span style="color:#f92672">=</span>device)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># nn.LSTM以元组作为隐状态</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> (torch<span style="color:#f92672">.</span>zeros((
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>num_directions <span style="color:#f92672">*</span> self<span style="color:#f92672">.</span>rnn<span style="color:#f92672">.</span>num_layers,
+</span></span><span style="display:flex;"><span>                batch_size, self<span style="color:#f92672">.</span>num_hiddens), device<span style="color:#f92672">=</span>device),
+</span></span><span style="display:flex;"><span>                    torch<span style="color:#f92672">.</span>zeros((
+</span></span><span style="display:flex;"><span>                        self<span style="color:#f92672">.</span>num_directions <span style="color:#f92672">*</span> self<span style="color:#f92672">.</span>rnn<span style="color:#f92672">.</span>num_layers,
+</span></span><span style="display:flex;"><span>                        batch_size, self<span style="color:#f92672">.</span>num_hiddens), device<span style="color:#f92672">=</span>device))
+</span></span></code></pre></div><p>可以注意到<strong>我们在前向传播的时候，先对input做了转置，才做one_hot</strong>，这是因为前面提到我们是在每个时间步处理一批数据，而不是一个数据处理所有时间步，而input的形状是(batch_size, num_step)，再做one_hot后就是(batch_size, num_step, vocab_size)了，如果我们想要一步处理全部数据，就得按第二个维度把这个X依次取出来。<br>
+不转置虽然逻辑上也能实现逐时间步处理，但由于内存访问顺序与 PyTorch 的张量存储布局（行主序）不匹配，会造成不连续内存访问，降低缓存命中率，从而略微影响性能。<br>
+一个简单的rnn内部对inputs的处理：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># inputs的形状： (num_step, batch_size, vocab_size)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># X的形状：(batch_size, vocab_size)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> X <span style="color:#f92672">in</span> inputs:
+</span></span><span style="display:flex;"><span>    H <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tanh(torch<span style="color:#f92672">.</span>mm(X, W_xh) <span style="color:#f92672">+</span> torch<span style="color:#f92672">.</span>mm(H, W_hh) <span style="color:#f92672">+</span> b_h)
+</span></span><span style="display:flex;"><span>    Y <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>mm(H, W_hq) <span style="color:#f92672">+</span> b_q
+</span></span><span style="display:flex;"><span>    outputs<span style="color:#f92672">.</span>append(Y)
+</span></span></code></pre></div><h4 id="223-预测">2.2.3 预测<a hidden class="anchor" aria-hidden="true" href="#223-预测">#</a></h4>
+<p>先把prefix字符一次遍历，来更新隐状态，这一步不会产生输出，成为预热期。<br>
+预热期结束后，隐状态的值通常比刚开始的初始值更适合预测， 从而预测字符并输出它们。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict</span>(prefix, num_preds, net, vocab, device): 
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;在prefix后面生成新字符&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    state <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>begin_state(batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, device<span style="color:#f92672">=</span>device)
+</span></span><span style="display:flex;"><span>    outputs <span style="color:#f92672">=</span> [vocab[prefix[<span style="color:#ae81ff">0</span>]]]
+</span></span><span style="display:flex;"><span>    get_input <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span>: torch<span style="color:#f92672">.</span>tensor([outputs[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]], device<span style="color:#f92672">=</span>device)<span style="color:#f92672">.</span>reshape((<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> prefix[<span style="color:#ae81ff">1</span>:]:  <span style="color:#75715e"># 预热期</span>
+</span></span><span style="display:flex;"><span>        _, state <span style="color:#f92672">=</span> net(get_input(), state)
+</span></span><span style="display:flex;"><span>        outputs<span style="color:#f92672">.</span>append(vocab[y])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#f92672">in</span> range(num_preds):  <span style="color:#75715e"># 预测num_preds步</span>
+</span></span><span style="display:flex;"><span>        y, state <span style="color:#f92672">=</span> net(get_input(), state)
+</span></span><span style="display:flex;"><span>        outputs<span style="color:#f92672">.</span>append(int(y<span style="color:#f92672">.</span>argmax(dim<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)<span style="color:#f92672">.</span>reshape(<span style="color:#ae81ff">1</span>)))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;&#39;</span><span style="color:#f92672">.</span>join([vocab<span style="color:#f92672">.</span>idx_to_token[i] <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> outputs])
+</span></span></code></pre></div><h4 id="224-训练模型">2.2.4 训练模型<a hidden class="anchor" aria-hidden="true" href="#224-训练模型">#</a></h4>
+<p>训练和前面差不多，只是需要注意Y和y_hat的对齐，以及梯度爆炸的问题。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">train_epoch</span>(net, train_iter, loss, updater, device, use_random_iter):
+</span></span><span style="display:flex;"><span>    state, timer <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>, d2l<span style="color:#f92672">.</span>Timer()
+</span></span><span style="display:flex;"><span>    metric <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>Accumulator(<span style="color:#ae81ff">2</span>)  <span style="color:#75715e"># 训练损失之和,词元数量</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> X, Y <span style="color:#f92672">in</span> train_iter:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> state <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">or</span> use_random_iter:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 在第一次迭代或使用随机抽样时初始化state</span>
+</span></span><span style="display:flex;"><span>            state <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>begin_state(batch_size<span style="color:#f92672">=</span>X<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>], device<span style="color:#f92672">=</span>device)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> isinstance(net, nn<span style="color:#f92672">.</span>Module) <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> isinstance(state, tuple):
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># state对于nn.GRU是个张量</span>
+</span></span><span style="display:flex;"><span>                state<span style="color:#f92672">.</span>detach_()
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># state对于nn.LSTM或对于我们从零开始实现的模型是个张量</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> s <span style="color:#f92672">in</span> state:
+</span></span><span style="display:flex;"><span>                    s<span style="color:#f92672">.</span>detach_()
+</span></span><span style="display:flex;"><span>        y <span style="color:#f92672">=</span> Y<span style="color:#f92672">.</span>T<span style="color:#f92672">.</span>reshape(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)     <span style="color:#75715e"># 为了和y_hat对齐</span>
+</span></span><span style="display:flex;"><span>        X, y <span style="color:#f92672">=</span> X<span style="color:#f92672">.</span>to(device), y<span style="color:#f92672">.</span>to(device)
+</span></span><span style="display:flex;"><span>        y_hat, state <span style="color:#f92672">=</span> net(X, state)
+</span></span><span style="display:flex;"><span>        l <span style="color:#f92672">=</span> loss(y_hat, y<span style="color:#f92672">.</span>long())<span style="color:#f92672">.</span>mean()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> isinstance(updater, torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>Optimizer):
+</span></span><span style="display:flex;"><span>            updater<span style="color:#f92672">.</span>zero_grad()
+</span></span><span style="display:flex;"><span>            l<span style="color:#f92672">.</span>backward()
+</span></span><span style="display:flex;"><span>            grad_clipping(net, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            updater<span style="color:#f92672">.</span>step()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            l<span style="color:#f92672">.</span>backward()
+</span></span><span style="display:flex;"><span>            grad_clipping(net, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 因为已经调用了mean函数</span>
+</span></span><span style="display:flex;"><span>            updater(batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>        metric<span style="color:#f92672">.</span>add(l <span style="color:#f92672">*</span> y<span style="color:#f92672">.</span>numel(), y<span style="color:#f92672">.</span>numel())
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> math<span style="color:#f92672">.</span>exp(metric[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">/</span> metric[<span style="color:#ae81ff">1</span>]), metric[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">/</span> timer<span style="color:#f92672">.</span>stop()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">train</span>(net, train_iter, vocab, lr, num_epochs, device,
+</span></span><span style="display:flex;"><span>              use_random_iter<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>):
+</span></span><span style="display:flex;"><span>    loss <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>CrossEntropyLoss()
+</span></span><span style="display:flex;"><span>    animator <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>Animator(xlabel<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;epoch&#39;</span>, ylabel<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;perplexity&#39;</span>,
+</span></span><span style="display:flex;"><span>                            legend<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;train&#39;</span>], xlim<span style="color:#f92672">=</span>[<span style="color:#ae81ff">10</span>, num_epochs])
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 初始化</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(net, nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>        updater <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>SGD(net<span style="color:#f92672">.</span>parameters(), lr)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        updater <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> batch_size: d2l<span style="color:#f92672">.</span>sgd(net<span style="color:#f92672">.</span>params, lr, batch_size)
+</span></span><span style="display:flex;"><span>    predict <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> prefix: predict(prefix, <span style="color:#ae81ff">50</span>, net, vocab, device)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 训练和预测</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> epoch <span style="color:#f92672">in</span> range(num_epochs):
+</span></span><span style="display:flex;"><span>        ppl, speed <span style="color:#f92672">=</span> train_epoch(
+</span></span><span style="display:flex;"><span>            net, train_iter, loss, updater, device, use_random_iter)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (epoch <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">10</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            print(predict(<span style="color:#e6db74">&#39;time traveller&#39;</span>))
+</span></span><span style="display:flex;"><span>            animator<span style="color:#f92672">.</span>add(epoch <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, [ppl])
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;困惑度 </span><span style="color:#e6db74">{</span>ppl<span style="color:#e6db74">:</span><span style="color:#e6db74">.1f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, </span><span style="color:#e6db74">{</span>speed<span style="color:#e6db74">:</span><span style="color:#e6db74">.1f</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> 词元/秒 </span><span style="color:#e6db74">{</span>str(device)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>    print(predict(<span style="color:#e6db74">&#39;time traveller&#39;</span>))
+</span></span><span style="display:flex;"><span>    print(predict(<span style="color:#e6db74">&#39;traveller&#39;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>device <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>try_gpu()
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> RNNModel(rnn_layer, vocab_size<span style="color:#f92672">=</span>len(vocab))
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>to(device)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>num_epochs, lr <span style="color:#f92672">=</span> <span style="color:#ae81ff">500</span>, <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>train(net, train_iter, vocab, lr, num_epochs, device)
+</span></span></code></pre></div><p>因为在num_step步里面，梯度会一直累计，就很容易出现梯度爆炸的问题，所以使用了一个<code>grad_clipping</code>。<br>
+他是通过将梯度$\mathbf{g}$投影回给定半径（例如$\theta$）的球来裁剪梯度$\mathbf{g}$。
+如下式：
+$$\mathbf{g} \leftarrow \min\left(1, \frac{\theta}{|\mathbf{g}|}\right) \mathbf{g}.$$</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">grad_clipping</span>(net, theta):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;裁剪梯度&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(net, nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> [p <span style="color:#66d9ef">for</span> p <span style="color:#f92672">in</span> net<span style="color:#f92672">.</span>parameters() <span style="color:#66d9ef">if</span> p<span style="color:#f92672">.</span>requires_grad]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>params
+</span></span><span style="display:flex;"><span>    norm <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>sqrt(sum(torch<span style="color:#f92672">.</span>sum((p<span style="color:#f92672">.</span>grad <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>)) <span style="color:#66d9ef">for</span> p <span style="color:#f92672">in</span> params))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> norm <span style="color:#f92672">&gt;</span> theta:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> param <span style="color:#f92672">in</span> params:
+</span></span><span style="display:flex;"><span>            param<span style="color:#f92672">.</span>grad[:] <span style="color:#f92672">*=</span> theta <span style="color:#f92672">/</span> norm
+</span></span></code></pre></div><h2 id="3-单元机制改进">3 单元机制改进<a hidden class="anchor" aria-hidden="true" href="#3-单元机制改进">#</a></h2>
+<p>对于RNN,如果把步数变得很大，就很容易出现梯度爆炸的问题，但是步数小又无法获得到比较早期的信息。<br>
+对于这类问题，最早的方法是“长短期记忆”（long-short-term memory，LSTM）。<br>
+门控循环单元（gated recurrent unit，GRU）是一个稍微简化的变体，通常能够提供同等的效果， 并且计算的速度明显更快。</p>
+<h3 id="31-门控循环单元gru">3.1 门控循环单元（GRU）<a hidden class="anchor" aria-hidden="true" href="#31-门控循环单元gru">#</a></h3>
+<h4 id="311-gru原理">3.1.1 GRU原理<a hidden class="anchor" aria-hidden="true" href="#311-gru原理">#</a></h4>
+<p><img alt="GRU" loading="lazy" src="/img/rnn/gru.png"><br>
+重置门：控制“可能还想记住”的过去状态的数量<br>
+$$
+\mathbf{R}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xr} + \mathbf{H}_{t-1} \mathbf{W}_{hr} + \mathbf{b}_r)
+$$
+更新门：允许我们控制新状态中有多少比例来自旧状态<br>
+$$
+\mathbf{Z}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xz} + \mathbf{H}_{t-1} \mathbf{W}_{hz} + \mathbf{b}_z)
+$$
+候选隐状态：由被重置门控制的过去状态和当前输入计算得到，当重置门很接近0的时候就基本只取决于当前输入，相当于状态被“重置”了<br>
+$$
+\tilde{\mathbf{H}}_t = \tanh(\mathbf{X}_t \mathbf{W}_{xh} + \left(\mathbf{R}_t \odot \mathbf{H}_{t-1}\right) \mathbf{W}_{hh} + \mathbf{b}_h)
+$$
+隐状态：由更新门分配上一时间隐状态和当前候选隐状态的比例，得到新的隐状态，如果更新门很接近0就相当于新的隐状态基本来自于候选隐状态，也就是隐状态被“更新”了
+$$
+\mathbf{H}_t = \mathbf{Z}_t \odot \mathbf{H}_{t-1}  + (1 - \mathbf{Z}_t) \odot \tilde{\mathbf{H}}_t
+$$</p>
+<p>总结：</p>
+<ul>
+<li>重置门有助于捕获序列中的短期依赖关系；</li>
+<li>更新门有助于捕获序列中的长期依赖关系。</li>
+</ul>
+<h4 id="312-gru实现">3.1.2 GRU实现<a hidden class="anchor" aria-hidden="true" href="#312-gru实现">#</a></h4>
+<p>Pytorch已经给我们实现好了，直接把<code>nn.RNN</code>改成<code>nn.GRU</code>就好了</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>num_inputs <span style="color:#f92672">=</span> vocab_size
+</span></span><span style="display:flex;"><span>gru_layer <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>GRU(num_inputs, num_hiddens)
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> RNNModel(gru_layer, len(vocab))
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>to(device)
+</span></span><span style="display:flex;"><span>train(model, train_iter, vocab, lr, num_epochs, device)
+</span></span></code></pre></div><h3 id="32-长短期记忆网络lstm">3.2 长短期记忆网络（LSTM）<a hidden class="anchor" aria-hidden="true" href="#32-长短期记忆网络lstm">#</a></h3>
+<h4 id="321-lstm原理">3.2.1 LSTM原理<a hidden class="anchor" aria-hidden="true" href="#321-lstm原理">#</a></h4>
+<p><img alt="LSTM" loading="lazy" src="/img/rnn/lstm.png"><br>
+多加了一条“线”——记忆元$\mathbf{C}_t$用来储存长期信息<br>
+原理是通过隐状态和当前输入先决定输入门$\mathbf{I}_t$、遗忘门$\mathbf{F}_t$、输出门$\mathbf{O}_t$和候选记忆元$\tilde{\mathbf{C}}_t$<br>
+然后根据遗忘门、输入门和之前的记忆元$\tilde{\mathbf{C}}_{t-1}$得到新的记忆元$\mathbf{C}_t$<br>
+最后根据新的记忆元和输出门来更新隐状态$\mathbf{H}_t$，并预测输出。<br>
+其中：<br>
+输入门$\mathbf{I}_t$：控制采用多少来自$\tilde{\mathbf{C}}_t$的新数据<br>
+$$\mathbf{I}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xi} + \mathbf{H}_{t-1} \mathbf{W}_{hi} + \mathbf{b}_i)$$</p>
+<p>遗忘门$\mathbf{F}_t$：控制保留多少过去的$\mathbf{C}_{t-1}$记忆元<br>
+$$\mathbf{F}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xf} + \mathbf{H}_{t-1} \mathbf{W}_{hf} + \mathbf{b}_f)$$</p>
+<p>输出门$\mathbf{O}_t$：决定预测部分有多少记忆信息<br>
+$$\mathbf{O}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xo} + \mathbf{H}_{t-1} \mathbf{W}_{ho} + \mathbf{b}_o)$$
+候选记忆元$\tilde{\mathbf{C}}_t$：相当于提取现在和和之前状态需要记忆的信息<br>
+$$
+\tilde{\mathbf{C}}_t = \text{tanh}(\mathbf{X}_t \mathbf{W}_{xc} + \mathbf{H}_{t-1} \mathbf{W}_{hc} + \mathbf{b}_c)
+$$
+记忆元$\mathbf{C}_t$：记忆过去的信息，由遗忘门和输入门分别控制旧、新信息比例
+$$\mathbf{C}_t = \mathbf{F}_t \odot \mathbf{C}_{t-1} + \mathbf{I}_t \odot \tilde{\mathbf{C}}_t$$
+隐状态$\mathbf{H}_t$：用来预测输出和控制下一个时间各个门的状态，由于遗忘门和输入门和不一定为1，因此需要对$\mathbf{C}_t$再使用一次tanh使其取值落到(-1,1)
+$$
+\mathbf{H}_t = \mathbf{O}_t \odot \tanh(\mathbf{C}_t)
+$$</p>
+<h4 id="322-lstm实现">3.2.2 LSTM实现<a hidden class="anchor" aria-hidden="true" href="#322-lstm实现">#</a></h4>
+<p>和GRU一样，Pytorch也有内部实现</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>lstm_layer <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>LSTM(num_inputs, num_hiddens)
+</span></span></code></pre></div><p>其他的还是和RNN差不多，需要注意的是state不再是一个元素，而是变成了一个元组(H, C)</p>
+<h2 id="4-网络结构扩展">4 网络结构扩展<a hidden class="anchor" aria-hidden="true" href="#4-网络结构扩展">#</a></h2>
+<p>前面都是只有一个单向隐藏层的循环神经网络，但是其实还可以对网络的结构进行调整，比如加深或者增加一个方向，于是就有深度循环神经网络和双向循环神经网络。</p>
+<h3 id="41-深度循环神经网络">4.1 深度循环神经网络<a hidden class="anchor" aria-hidden="true" href="#41-深度循环神经网络">#</a></h3>
+<p><img alt="deeprnn" loading="lazy" src="/img/rnn/deeprnn.png"><br>
+公式：<br>
+$$
+\mathbf{H}_t^{(l)} = \phi_l(\mathbf{H}_t^{(l-1)} \mathbf{W}_{xh}^{(l)} + \mathbf{H}_{t-1}^{(l)} \mathbf{W}_{hh}^{(l)}  + \mathbf{b}_h^{(l)})
+$$
+实现：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>vocab_size, num_hiddens, num_layers <span style="color:#f92672">=</span> len(vocab), <span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>num_inputs <span style="color:#f92672">=</span> vocab_size
+</span></span><span style="display:flex;"><span>device <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>try_gpu()
+</span></span><span style="display:flex;"><span>lstm_layer <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>LSTM(num_inputs, num_hiddens, num_layers)
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> RNNModel(lstm_layer, len(vocab))
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> model<span style="color:#f92672">.</span>to(device)
+</span></span></code></pre></div><p>只需要指定层数就行，RNN，GRU，LSTM都可以使用。</p>
+<h3 id="42-双向循环神经网络">4.2 双向循环神经网络<a hidden class="anchor" aria-hidden="true" href="#42-双向循环神经网络">#</a></h3>
+<p><img alt="towwayrnn" loading="lazy" src="/img/rnn/twowayrnn.png"><br>
+除了过去的信息我们还可以利用未来的信息，这就是双向循环神经网络<br>
+但是他只能用来解决补充的问题，对于预测问题，由于没有未来信息，所以效果很差<br>
+其实就是两个rnn，一正一反就可以了<br>
+公式：<br>
+$$
+\begin{aligned}
+\overrightarrow{\mathbf{H}}_t &amp;= \phi(\mathbf{X}_t \mathbf{W}_{xh}^{(f)} + \overrightarrow{\mathbf{H}}_{t-1} \mathbf{W}_{hh}^{(f)}  + \mathbf{b}_h^{(f)})\\
+\overleftarrow{\mathbf{H}}_t &amp;= \phi(\mathbf{X}_t \mathbf{W}_{xh}^{(b)} + \overleftarrow{\mathbf{H}}_{t+1} \mathbf{W}_{hh}^{(b)}  + \mathbf{b}_h^{(b)})
+\end{aligned}
+$$</p>
+<p>双向层的使用在实践中非常少，并且仅仅应用于部分场合。 例如，填充缺失的单词、词元注释（例如，用于命名实体识别） 以及作为序列处理流水线中的一个步骤对序列进行编码（例如，用于机器翻译）。</p>
+<h2 id="5-序列到序列学习seq2seq">5 序列到序列学习（Seq2Seq）<a hidden class="anchor" aria-hidden="true" href="#5-序列到序列学习seq2seq">#</a></h2>
+<p>机器翻译中的输入序列和输出序列都是长度可变的。我们可以使用两个循环神经网络的编码器和解码器结构来解决这种序列到序列的任务。</p>
+<h3 id="51-编码器-解码器架构">5.1 编码器-解码器架构<a hidden class="anchor" aria-hidden="true" href="#51-编码器-解码器架构">#</a></h3>
+<p><img alt="seq2seq" loading="lazy" src="/img/rnn/seq2seq.png"><br>
+首先要对输入序列进行处理，使用额外的特定词元，例如用于将序列填充到相同长度的填充词元（“&lt;pad&gt;”）， 以及序列的开始词元（“&lt;bos&gt;”）和结束词元（“&lt;eos&gt;”）。
+把处理完的输入序列输入到编码器中，用来更新其隐状态，把最后的隐状态传给解码器，<br>
+然后用特定的“&lt;bos&gt;”表示序列开始词元进行预测，注意！为了进一步包含经过编码的输入序列的信息，<strong>上下文变量在所有的时间步与解码器的输入进行拼接（concatenate）</strong>。直到最后生成的“&lt;eos&gt;”词元说明完成了序列输出工作。</p>
+<p>编码器-解码器就相当于是直接读取了全部的句子，之后再映射到另一个句子。而如果单纯使用RNN，那么在读输入的同时它的输出空间也在被训练，也就是还没理解完一个完整的句子就开始预测输出内容了。</p>
+<p>编码器：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Encoder</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;编码器-解码器架构的基本编码器接口&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>        super(Encoder, self)<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, X, <span style="color:#f92672">*</span>args):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">NotImplementedError</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Seq2SeqEncoder</span>(Encoder):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;用于序列到序列学习的循环神经网络编码器&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, vocab_size, embed_size, num_hiddens, num_layers,
+</span></span><span style="display:flex;"><span>                 dropout<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>        super(Seq2SeqEncoder, self)<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 嵌入层</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>embedding <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Embedding(vocab_size, embed_size)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>rnn <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>GRU(embed_size, num_hiddens, num_layers,
+</span></span><span style="display:flex;"><span>                          dropout<span style="color:#f92672">=</span>dropout)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, X, <span style="color:#f92672">*</span>args):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 输出&#39;X&#39;的形状：(batch_size,num_steps,embed_size)</span>
+</span></span><span style="display:flex;"><span>        X <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>embedding(X)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 在循环神经网络模型中，第一个轴对应于时间步</span>
+</span></span><span style="display:flex;"><span>        X <span style="color:#f92672">=</span> X<span style="color:#f92672">.</span>permute(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 如果未提及状态，则默认为0</span>
+</span></span><span style="display:flex;"><span>        output, state <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rnn(X)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># output的形状:(num_steps,batch_size,num_hiddens)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># state的形状:(num_layers,batch_size,num_hiddens)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> output, state
+</span></span></code></pre></div><p>解码器：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Decoder</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;编码器-解码器架构的基本解码器接口&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>        super(Decoder, self)<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_state</span>(self, enc_outputs, <span style="color:#f92672">*</span>args):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">NotImplementedError</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, X, state):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">NotImplementedError</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Seq2SeqDecoder</span>(Decoder):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;用于序列到序列学习的循环神经网络解码器&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, vocab_size, embed_size, num_hiddens, num_layers,
+</span></span><span style="display:flex;"><span>                 dropout<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>        super(Seq2SeqDecoder, self)<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>embedding <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Embedding(vocab_size, embed_size)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>rnn <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>GRU(embed_size <span style="color:#f92672">+</span> num_hiddens, num_hiddens, num_layers,
+</span></span><span style="display:flex;"><span>                          dropout<span style="color:#f92672">=</span>dropout)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>dense <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(num_hiddens, vocab_size)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_state</span>(self, enc_outputs, <span style="color:#f92672">*</span>args):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> enc_outputs[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, X, state):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 输出&#39;X&#39;的形状：(batch_size,num_steps,embed_size)</span>
+</span></span><span style="display:flex;"><span>        X <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>embedding(X)<span style="color:#f92672">.</span>permute(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 广播context，使其具有与X相同的num_steps</span>
+</span></span><span style="display:flex;"><span>        context <span style="color:#f92672">=</span> state[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>repeat(X<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>], <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>        X_and_context <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>cat((X, context), <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        output, state <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rnn(X_and_context, state)
+</span></span><span style="display:flex;"><span>        output <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>dense(output)<span style="color:#f92672">.</span>permute(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># output的形状:(batch_size,num_steps,vocab_size)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># state的形状:(num_layers,batch_size,num_hiddens)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> output, state
+</span></span></code></pre></div><p>这里使用了嵌入层（embedding layer）来获得输入序列中每个词元的特征向量。<br>
+嵌入层的权重是一个矩阵，其行数等于输入词表的大小（vocab_size），其列数等于特征向量的维度（embed_size）。
+embedding layer的参数（权重矩阵）是可以学习的</p>
+<p>为什么不使用one-hot encoding？因为长度太大的话，计算量和参数量爆炸；且无法表示token之间的关联性。</p>
+<h3 id="52-损失函数">5.2 损失函数<a hidden class="anchor" aria-hidden="true" href="#52-损失函数">#</a></h3>
+<p>因为我们有进行一些填充，所以在计算损失函数的时候要屏蔽掉那些被填充的项,<br>
+然后在算一个batch的时候就根据长度加权求加权平均损失。
+其他的就是正常的oftmax交叉熵。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sequence_mask</span>(X, valid_len, value<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;在序列中屏蔽不相关的项&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    maxlen <span style="color:#f92672">=</span> X<span style="color:#f92672">.</span>size(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    mask <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>arange((maxlen), dtype<span style="color:#f92672">=</span>torch<span style="color:#f92672">.</span>float32,
+</span></span><span style="display:flex;"><span>                        device<span style="color:#f92672">=</span>X<span style="color:#f92672">.</span>device)[<span style="color:#66d9ef">None</span>, :] <span style="color:#f92672">&lt;</span> valid_len[:, <span style="color:#66d9ef">None</span>]
+</span></span><span style="display:flex;"><span>    X[<span style="color:#f92672">~</span>mask] <span style="color:#f92672">=</span> value
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> X
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>], [<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>]])
+</span></span><span style="display:flex;"><span>sequence_mask(X, torch<span style="color:#f92672">.</span>tensor([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MaskedSoftmaxCELoss</span>(nn<span style="color:#f92672">.</span>CrossEntropyLoss):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;带遮蔽的softmax交叉熵损失函数&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># pred的形状：(batch_size,num_steps,vocab_size)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># label的形状：(batch_size,num_steps)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># valid_len的形状：(batch_size,)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, pred, label, valid_len):
+</span></span><span style="display:flex;"><span>        weights <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>ones_like(label)
+</span></span><span style="display:flex;"><span>        weights <span style="color:#f92672">=</span> sequence_mask(weights, valid_len)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>reduction<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;none&#39;</span>   <span style="color:#75715e"># 不要自动对batch求平均，返回每个元素的独立损失，后面手动加权</span>
+</span></span><span style="display:flex;"><span>        unweighted_loss <span style="color:#f92672">=</span> super(MaskedSoftmaxCELoss, self)<span style="color:#f92672">.</span>forward(
+</span></span><span style="display:flex;"><span>            pred<span style="color:#f92672">.</span>permute(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">1</span>), label)
+</span></span><span style="display:flex;"><span>        weighted_loss <span style="color:#f92672">=</span> (unweighted_loss <span style="color:#f92672">*</span> weights)<span style="color:#f92672">.</span>mean(dim<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> weighted_loss
+</span></span></code></pre></div><h3 id="53-模型训练">5.3 模型训练<a hidden class="anchor" aria-hidden="true" href="#53-模型训练">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">train_seq2seq</span>(net, data_iter, lr, num_epochs, tgt_vocab, device):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;训练序列到序列模型&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">xavier_init_weights</span>(m):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>            nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>xavier_uniform_(m<span style="color:#f92672">.</span>weight)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>GRU:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> param <span style="color:#f92672">in</span> m<span style="color:#f92672">.</span>_flat_weights_names:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;weight&#34;</span> <span style="color:#f92672">in</span> param:
+</span></span><span style="display:flex;"><span>                    nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>xavier_uniform_(m<span style="color:#f92672">.</span>_parameters[param])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>apply(xavier_init_weights)
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>to(device)
+</span></span><span style="display:flex;"><span>    optimizer <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>Adam(net<span style="color:#f92672">.</span>parameters(), lr<span style="color:#f92672">=</span>lr)
+</span></span><span style="display:flex;"><span>    loss <span style="color:#f92672">=</span> MaskedSoftmaxCELoss()
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>train()
+</span></span><span style="display:flex;"><span>    animator <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>Animator(xlabel<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;epoch&#39;</span>, ylabel<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;loss&#39;</span>,
+</span></span><span style="display:flex;"><span>                     xlim<span style="color:#f92672">=</span>[<span style="color:#ae81ff">10</span>, num_epochs])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> epoch <span style="color:#f92672">in</span> range(num_epochs):
+</span></span><span style="display:flex;"><span>        timer <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>Timer()
+</span></span><span style="display:flex;"><span>        metric <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>Accumulator(<span style="color:#ae81ff">2</span>)  <span style="color:#75715e"># 训练损失总和，词元数量</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> batch <span style="color:#f92672">in</span> data_iter:
+</span></span><span style="display:flex;"><span>            optimizer<span style="color:#f92672">.</span>zero_grad()
+</span></span><span style="display:flex;"><span>            X, X_valid_len, Y, Y_valid_len <span style="color:#f92672">=</span> [x<span style="color:#f92672">.</span>to(device) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> batch]
+</span></span><span style="display:flex;"><span>            bos <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([tgt_vocab[<span style="color:#e6db74">&#39;&lt;bos&gt;&#39;</span>]] <span style="color:#f92672">*</span> Y<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>],
+</span></span><span style="display:flex;"><span>                          device<span style="color:#f92672">=</span>device)<span style="color:#f92672">.</span>reshape(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            dec_input <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>cat([bos, Y[:, :<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]], <span style="color:#ae81ff">1</span>)  <span style="color:#75715e"># 强制教学</span>
+</span></span><span style="display:flex;"><span>            Y_hat, _ <span style="color:#f92672">=</span> net(X, dec_input, X_valid_len)
+</span></span><span style="display:flex;"><span>            l <span style="color:#f92672">=</span> loss(Y_hat, Y, Y_valid_len)
+</span></span><span style="display:flex;"><span>            l<span style="color:#f92672">.</span>sum()<span style="color:#f92672">.</span>backward()      <span style="color:#75715e"># 损失函数的标量进行“反向传播”</span>
+</span></span><span style="display:flex;"><span>            d2l<span style="color:#f92672">.</span>grad_clipping(net, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            num_tokens <span style="color:#f92672">=</span> Y_valid_len<span style="color:#f92672">.</span>sum()
+</span></span><span style="display:flex;"><span>            optimizer<span style="color:#f92672">.</span>step()
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">with</span> torch<span style="color:#f92672">.</span>no_grad():
+</span></span><span style="display:flex;"><span>                metric<span style="color:#f92672">.</span>add(l<span style="color:#f92672">.</span>sum(), num_tokens)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (epoch <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">10</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            animator<span style="color:#f92672">.</span>add(epoch <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, (metric[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">/</span> metric[<span style="color:#ae81ff">1</span>],))
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;loss </span><span style="color:#e6db74">{</span>metric[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">/</span> metric[<span style="color:#ae81ff">1</span>]<span style="color:#e6db74">:</span><span style="color:#e6db74">.3f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, </span><span style="color:#e6db74">{</span>metric[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">/</span> timer<span style="color:#f92672">.</span>stop()<span style="color:#e6db74">:</span><span style="color:#e6db74">.1f</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> &#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;tokens/sec on </span><span style="color:#e6db74">{</span>str(device)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span></code></pre></div><h3 id="54-模型预测">5.4 模型预测<a hidden class="anchor" aria-hidden="true" href="#54-模型预测">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict_seq2seq</span>(net, src_sentence, src_vocab, tgt_vocab, num_steps,
+</span></span><span style="display:flex;"><span>                    device, save_attention_weights<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;序列到序列模型的预测&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 在预测时将net设置为评估模式</span>
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>eval()
+</span></span><span style="display:flex;"><span>    src_tokens <span style="color:#f92672">=</span> src_vocab[src_sentence<span style="color:#f92672">.</span>lower()<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39; &#39;</span>)] <span style="color:#f92672">+</span> [
+</span></span><span style="display:flex;"><span>        src_vocab[<span style="color:#e6db74">&#39;&lt;eos&gt;&#39;</span>]]
+</span></span><span style="display:flex;"><span>    enc_valid_len <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([len(src_tokens)], device<span style="color:#f92672">=</span>device)
+</span></span><span style="display:flex;"><span>    src_tokens <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>truncate_pad(src_tokens, num_steps, src_vocab[<span style="color:#e6db74">&#39;&lt;pad&gt;&#39;</span>])
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 添加批量轴</span>
+</span></span><span style="display:flex;"><span>    enc_X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>unsqueeze(
+</span></span><span style="display:flex;"><span>        torch<span style="color:#f92672">.</span>tensor(src_tokens, dtype<span style="color:#f92672">=</span>torch<span style="color:#f92672">.</span>long, device<span style="color:#f92672">=</span>device), dim<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    enc_outputs <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>encoder(enc_X, enc_valid_len)
+</span></span><span style="display:flex;"><span>    dec_state <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>decoder<span style="color:#f92672">.</span>init_state(enc_outputs, enc_valid_len)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 添加批量轴</span>
+</span></span><span style="display:flex;"><span>    dec_X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>unsqueeze(torch<span style="color:#f92672">.</span>tensor(
+</span></span><span style="display:flex;"><span>        [tgt_vocab[<span style="color:#e6db74">&#39;&lt;bos&gt;&#39;</span>]], dtype<span style="color:#f92672">=</span>torch<span style="color:#f92672">.</span>long, device<span style="color:#f92672">=</span>device), dim<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    output_seq, attention_weight_seq <span style="color:#f92672">=</span> [], []
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#f92672">in</span> range(num_steps):
+</span></span><span style="display:flex;"><span>        Y, dec_state <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>decoder(dec_X, dec_state)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 我们使用具有预测最高可能性的词元，作为解码器在下一时间步的输入</span>
+</span></span><span style="display:flex;"><span>        dec_X <span style="color:#f92672">=</span> Y<span style="color:#f92672">.</span>argmax(dim<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        pred <span style="color:#f92672">=</span> dec_X<span style="color:#f92672">.</span>squeeze(dim<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)<span style="color:#f92672">.</span>type(torch<span style="color:#f92672">.</span>int32)<span style="color:#f92672">.</span>item()
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 保存注意力权重（稍后讨论）</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> save_attention_weights:
+</span></span><span style="display:flex;"><span>            attention_weight_seq<span style="color:#f92672">.</span>append(net<span style="color:#f92672">.</span>decoder<span style="color:#f92672">.</span>attention_weights)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 一旦序列结束词元被预测，输出序列的生成就完成了</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> pred <span style="color:#f92672">==</span> tgt_vocab[<span style="color:#e6db74">&#39;&lt;eos&gt;&#39;</span>]:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        output_seq<span style="color:#f92672">.</span>append(pred)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39; &#39;</span><span style="color:#f92672">.</span>join(tgt_vocab<span style="color:#f92672">.</span>to_tokens(output_seq)), attention_weight_seq
+</span></span></code></pre></div><h3 id="55-预测序列的评估">5.5 预测序列的评估<a hidden class="anchor" aria-hidden="true" href="#55-预测序列的评估">#</a></h3>
+<p>我们可以通过与真实的标签序列进行比较来评估预测序列。<br>
+BLEU（bilingual evaluation understudy） 最先是用于评估机器翻译的结果， 但现在它已经被广泛用于测量许多应用的输出序列的质量。<br>
+$$
+\exp\left(\min\left(0, 1 - \frac{\mathrm{len}_{\text{label}}}{\mathrm{len}_{\text{pred}}}\right)\right) \prod_{n=1}^k p_n^{1/2^n},
+$$
+当预测序列与标签序列完全相同时，BLEU为1，越小表示差别越大。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">bleu</span>(pred_seq, label_seq, k):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;计算BLEU&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    pred_tokens, label_tokens <span style="color:#f92672">=</span> pred_seq<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39; &#39;</span>), label_seq<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39; &#39;</span>)
+</span></span><span style="display:flex;"><span>    len_pred, len_label <span style="color:#f92672">=</span> len(pred_tokens), len(label_tokens)
+</span></span><span style="display:flex;"><span>    score <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span>exp(min(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> len_label <span style="color:#f92672">/</span> len_pred))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> n <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">1</span>, k <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>        num_matches, label_subs <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, collections<span style="color:#f92672">.</span>defaultdict(int)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len_label <span style="color:#f92672">-</span> n <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>            label_subs[<span style="color:#e6db74">&#39; &#39;</span><span style="color:#f92672">.</span>join(label_tokens[i: i <span style="color:#f92672">+</span> n])] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len_pred <span style="color:#f92672">-</span> n <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> label_subs[<span style="color:#e6db74">&#39; &#39;</span><span style="color:#f92672">.</span>join(pred_tokens[i: i <span style="color:#f92672">+</span> n])] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                num_matches <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>                label_subs[<span style="color:#e6db74">&#39; &#39;</span><span style="color:#f92672">.</span>join(pred_tokens[i: i <span style="color:#f92672">+</span> n])] <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        score <span style="color:#f92672">*=</span> math<span style="color:#f92672">.</span>pow(num_matches <span style="color:#f92672">/</span> (len_pred <span style="color:#f92672">-</span> n <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>), math<span style="color:#f92672">.</span>pow(<span style="color:#ae81ff">0.5</span>, n))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> score
+</span></span></code></pre></div>
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/transformer/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>Transformer</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/cnn/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>卷积神经网络</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

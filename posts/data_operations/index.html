@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>数据操作 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="PyTorch中数据操作的一些简单笔记">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/data_operations/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/data_operations/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/data_operations/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="数据操作">
+  <meta property="og:description" content="PyTorch中数据操作的一些简单笔记">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-12T22:51:19+08:00">
+    <meta property="article:modified_time" content="2025-09-12T22:51:19+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数据操作">
+<meta name="twitter:description" content="PyTorch中数据操作的一些简单笔记">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "数据操作",
+      "item": "https://eivver.github.io/posts/data_operations/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "数据操作",
+  "name": "数据操作",
+  "description": "PyTorch中数据操作的一些简单笔记",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": " 1 原地操作 执行 X = X + Y 时，Python首先计算 Y + X ，为结果分配新的内存，然后使 Y 指向内存中的这个新位置。\nprint('before:id(X):', id(X)) X = X + Y print('after:id(X):', id(X)) 以上测试可以发现两次id(X)不一致。\n如果要实现原地操作可以使用 X[:] = X + Y 或者 X += Y 。\n2 张量对象转换 torch定义的张量和numpy定义的张量可以很方便的相互转换。\ntorch.tensor -\u003e numpy.ndarray\nA = numpy.array([[1,2],[3,4]]) B = torch.tensor(A) # 会拷贝数据，不共享内存 C = torch.from_numpy(A) # 共享内存，原地修改一个会影响另一个，注意是原地修改！！ D = torch.as_tensor(A) # 兼容各种输入（ndarray / list / Tensor） numpy.ndarray -\u003e torch.tensor\n# tensor在CPU上，直接转换，共享内存 A = torch.tensor([[1, 2], [3, 4]]) B = A.numpy() # tensor在GPU上，不能直接转换，需要先拷贝到 CPU 上再转换 A = torch.tensor([[1, 2], [3, 4]], device='cuda') B = A.cpu().numpy() # tensor 如果开启自动求导追踪 requires_grad=True，要先.detach()避免和计算图纠缠 A = torch.tensor([[1, 2], [3, 4]], requires_grad = True) B = A.detach().numpy() 3 数据预处理 数据处理一般是用`pandas，因为他可以与张量兼容。\n3.1 读取数据 第一步是从csv中获取到数据，但是这个数据一般还需要经过清洗等处理才能用来训练模型。\n可以通过data = pd.read_csv(data_file)读取数据。\n因为我们一般是用来做预测模型的训练，所以读取到数据之后一般还得将其分为输入和输出。\n想要获取某一行/列或某几行/列的数据，可以用位置索引iloc。\n例如：\ninputs, outputs = data.iloc[:, 0:2], data.iloc[:, 2] inputs为data的前两列，outputs为data的最后一列。\n3.2 处理缺失值 有些数据会显示NaN(not a number)，可能是在前期获取数据的时候获取不全面，这种情况是很常见的。 对于这些缺失值的处理，可以选择直接剔除缺失值或者对其进行插值等方法，主要取决于数据的特性。\n我们有以下数据\nNumRooms Alley 0 NaN Pave 1 2.0 NaN 2 4.0 NaN 3 NaN NaN 例如我们要用某一列其余数据的平均值填充空值\ninputs = inputs.fillna(inputs.mean(numeric_only=True)) #numeric_only只对数值类型的列计算平均值 而对于inputs中的类别值或离散值，我们将“NaN”视为一个类别。\ninputs = pd.get_dummies(inputs, dummy_na=True) get_dummies() 可以吧分类变量转换成one-hot encoding\ndummy_na 是表示是否把NaN当成一类\n3.3 转换为张量 张量可以用于深度学习训练、自动求导等\ndataFrame -\u003e ndarry -\u003e tensor\nX = torch.tensor(inputs.to_numpy(dtype=float)) #CPU张量 Y = torch.tensor(outputs.to_numpy(dtype=float), device='cuda') #GPU张量 ",
+  "wordCount" : "887",
+  "inLanguage": "zh",
+  "datePublished": "2025-09-12T22:51:19+08:00",
+  "dateModified": "2025-09-12T22:51:19+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/data_operations/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                数据操作
+            </h1>
+            <div class="post-description">
+                PyTorch中数据操作的一些简单笔记
+            </div>
+            <div class="post-meta">创建:&nbsp;<span title='2025-09-12 22:51:19 +0800 CST'>2025-09-12</span>&nbsp;|&nbsp;字数:&nbsp;887字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e5%8e%9f%e5%9c%b0%e6%93%8d%e4%bd%9c" aria-label="1 原地操作">1 原地操作</a></li>
+                <li>
+                    <a href="#2-%e5%bc%a0%e9%87%8f%e5%af%b9%e8%b1%a1%e8%bd%ac%e6%8d%a2" aria-label="2 张量对象转换">2 张量对象转换</a></li>
+                <li>
+                    <a href="#3-%e6%95%b0%e6%8d%ae%e9%a2%84%e5%a4%84%e7%90%86" aria-label="3 数据预处理">3 数据预处理</a><ul>
+                        
+                <li>
+                    <a href="#31-%e8%af%bb%e5%8f%96%e6%95%b0%e6%8d%ae" aria-label="3.1 读取数据">3.1 读取数据</a></li>
+                <li>
+                    <a href="#32-%e5%a4%84%e7%90%86%e7%bc%ba%e5%a4%b1%e5%80%bc" aria-label="3.2 处理缺失值">3.2 处理缺失值</a></li>
+                <li>
+                    <a href="#33-%e8%bd%ac%e6%8d%a2%e4%b8%ba%e5%bc%a0%e9%87%8f" aria-label="3.3 转换为张量">3.3 转换为张量</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><!-- # 数据操作 -->
+<h2 id="1-原地操作">1 原地操作<a hidden class="anchor" aria-hidden="true" href="#1-原地操作">#</a></h2>
+<p>执行 <code>X = X + Y</code> 时，Python首先计算 <code>Y + X</code> ，为结果分配新的内存，然后使 <code>Y</code> 指向内存中的这个新位置。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(<span style="color:#e6db74">&#39;before:id(X):&#39;</span>, id(X))
+</span></span><span style="display:flex;"><span>X <span style="color:#f92672">=</span> X <span style="color:#f92672">+</span> Y
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#39;after:id(X):&#39;</span>, id(X))
+</span></span></code></pre></div><p>以上测试可以发现两次id(X)不一致。</p>
+<p>如果要实现原地操作可以使用 <code>X[:] = X + Y</code> 或者 <code>X += Y</code> 。</p>
+<h2 id="2-张量对象转换">2 张量对象转换<a hidden class="anchor" aria-hidden="true" href="#2-张量对象转换">#</a></h2>
+<p>torch定义的张量和numpy定义的张量可以很方便的相互转换。<br>
+torch.tensor -&gt; numpy.ndarray</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>A <span style="color:#f92672">=</span> numpy<span style="color:#f92672">.</span>array([[<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>],[<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">4</span>]])
+</span></span><span style="display:flex;"><span>B <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor(A)             <span style="color:#75715e"># 会拷贝数据，不共享内存</span>
+</span></span><span style="display:flex;"><span>C <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>from_numpy(A)         <span style="color:#75715e"># 共享内存，原地修改一个会影响另一个，注意是原地修改！！</span>
+</span></span><span style="display:flex;"><span>D <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>as_tensor(A)          <span style="color:#75715e"># 兼容各种输入（ndarray / list / Tensor）</span>
+</span></span></code></pre></div><p>numpy.ndarray -&gt; torch.tensor</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># tensor在CPU上，直接转换，共享内存</span>
+</span></span><span style="display:flex;"><span>A <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>], [<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]])
+</span></span><span style="display:flex;"><span>B <span style="color:#f92672">=</span> A<span style="color:#f92672">.</span>numpy()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># tensor在GPU上，不能直接转换，需要先拷贝到 CPU 上再转换</span>
+</span></span><span style="display:flex;"><span>A <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>], [<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]], device<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;cuda&#39;</span>)
+</span></span><span style="display:flex;"><span>B <span style="color:#f92672">=</span> A<span style="color:#f92672">.</span>cpu()<span style="color:#f92672">.</span>numpy()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># tensor 如果开启自动求导追踪 requires_grad=True，要先.detach()避免和计算图纠缠</span>
+</span></span><span style="display:flex;"><span>A <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor([[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>], [<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>]], requires_grad <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>B <span style="color:#f92672">=</span> A<span style="color:#f92672">.</span>detach()<span style="color:#f92672">.</span>numpy()
+</span></span></code></pre></div><h2 id="3-数据预处理">3 数据预处理<a hidden class="anchor" aria-hidden="true" href="#3-数据预处理">#</a></h2>
+<p>数据处理一般是用`pandas，因为他可以与张量兼容。</p>
+<h3 id="31-读取数据">3.1 读取数据<a hidden class="anchor" aria-hidden="true" href="#31-读取数据">#</a></h3>
+<p>第一步是从csv中获取到数据，但是这个数据一般还需要经过清洗等处理才能用来训练模型。<br>
+可以通过<code>data = pd.read_csv(data_file)</code>读取数据。<br>
+因为我们一般是用来做预测模型的训练，所以读取到数据之后一般还得将其分为输入和输出。<br>
+想要获取某一行/列或某几行/列的数据，可以用位置索引<code>iloc</code>。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>inputs, outputs <span style="color:#f92672">=</span> data<span style="color:#f92672">.</span>iloc[:, <span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">2</span>], data<span style="color:#f92672">.</span>iloc[:, <span style="color:#ae81ff">2</span>]
+</span></span></code></pre></div><p><code>inputs</code>为<code>data</code>的前两列，<code>outputs</code>为<code>data</code>的最后一列。</p>
+<h3 id="32-处理缺失值">3.2 处理缺失值<a hidden class="anchor" aria-hidden="true" href="#32-处理缺失值">#</a></h3>
+<p>有些数据会显示NaN(not a number)，可能是在前期获取数据的时候获取不全面，这种情况是很常见的。
+对于这些缺失值的处理，可以选择直接剔除缺失值或者对其进行插值等方法，主要取决于数据的特性。</p>
+<p>我们有以下数据</p>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>NumRooms</th>
+          <th>Alley</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>0</td>
+          <td>NaN</td>
+          <td>Pave</td>
+      </tr>
+      <tr>
+          <td>1</td>
+          <td>2.0</td>
+          <td>NaN</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>4.0</td>
+          <td>NaN</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td>NaN</td>
+          <td>NaN</td>
+      </tr>
+  </tbody>
+</table>
+<p>例如我们要用某一列其余数据的平均值填充空值</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>inputs <span style="color:#f92672">=</span> inputs<span style="color:#f92672">.</span>fillna(inputs<span style="color:#f92672">.</span>mean(numeric_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>))      <span style="color:#75715e">#numeric_only只对数值类型的列计算平均值</span>
+</span></span></code></pre></div><p>而对于<code>inputs</code>中的类别值或离散值，我们将“NaN”视为一个类别。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>inputs <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>get_dummies(inputs, dummy_na<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p><code>get_dummies()</code> 可以吧分类变量转换成one-hot encoding<br>
+<code>dummy_na</code> 是表示是否把NaN当成一类</p>
+<h3 id="33-转换为张量">3.3 转换为张量<a hidden class="anchor" aria-hidden="true" href="#33-转换为张量">#</a></h3>
+<p>张量可以用于深度学习训练、自动求导等<br>
+dataFrame -&gt; ndarry -&gt; tensor</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor(inputs<span style="color:#f92672">.</span>to_numpy(dtype<span style="color:#f92672">=</span>float))                  <span style="color:#75715e">#CPU张量</span>
+</span></span><span style="display:flex;"><span>Y <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>tensor(outputs<span style="color:#f92672">.</span>to_numpy(dtype<span style="color:#f92672">=</span>float), device<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;cuda&#39;</span>)  <span style="color:#75715e">#GPU张量</span>
+</span></span></code></pre></div>
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/autograd/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>自动求导</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/install_debug/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>安装PyTorch踩的坑</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

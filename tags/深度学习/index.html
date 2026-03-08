@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>深度学习 | eivver&#39;s Blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://eivver.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/index.xml">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="深度学习">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深度学习">
+<meta name="twitter:description" content="">
+
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/tags/">🏷️ 标签</a></div>
+  <h1>深度学习</h1>
+</header>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>Transformer
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        Transformer是一种采用注意力机制的深度学习架构，这一机制可以按输入数据各部分重要性的不同而分配不同的权重。于2017年由谷歌大脑的一个团队在论文《Attention Is All You Need》中提出，现已逐步取代长短期记忆（LSTM）等RNN模型成为了NLP问题的首选模型。并行化优势允许其在更大的数据集上进行训练。这也促成了BERT、GPT等预训练模型的发展。  
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-11-25 11:33:14 +0800 CST'>2025-11-25</span>&nbsp;|&nbsp;字数:&nbsp;9081字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+<figure class="entry-cover">
+        <img loading="lazy" src="https://eivver.github.io/img/transformer/transformer.svg" alt="">
+</figure>
+  <a class="entry-link" aria-label="post link to Transformer" href="https://eivver.github.io/posts/transformer/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>循环神经网络
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-10-10 13:18:47 +0800 CST'>2025-10-10</span>&nbsp;|&nbsp;字数:&nbsp;7632字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+<figure class="entry-cover">
+        <img loading="lazy" src="https://eivver.github.io/img/rnn/RNN_.png" alt="">
+</figure>
+  <a class="entry-link" aria-label="post link to 循环神经网络" href="https://eivver.github.io/posts/rnn/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>卷积神经网络
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        卷积神经网络（convolutional neural network，CNN）是一类强大的、为处理图像数据而设计的神经网络。 基于卷积神经网络架构的模型在计算机视觉领域中已经占主导地位，当今几乎所有的图像识别、目标检测或语义分割相关的学术竞赛和商业应用都以这种方法为基础。
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-10-04 20:53:57 +0800 CST'>2025-10-04</span>&nbsp;|&nbsp;字数:&nbsp;5417字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+<figure class="entry-cover">
+        <img loading="lazy" src="https://eivver.github.io/img/cnn/cnn.png" alt="">
+</figure>
+  <a class="entry-link" aria-label="post link to 卷积神经网络" href="https://eivver.github.io/posts/cnn/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>深度学习计算
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-10-02 15:31:23 +0800 CST'>2025-10-02</span>&nbsp;|&nbsp;字数:&nbsp;2178字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to 深度学习计算" href="https://eivver.github.io/posts/deeplearning_library/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>多层感知机
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-09-30 22:10:25 +0800 CST'>2025-09-30</span>&nbsp;|&nbsp;字数:&nbsp;1157字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to 多层感知机" href="https://eivver.github.io/posts/multilayer_perceptron/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>Softmax回归
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        softmax用来解决分类的问题
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-09-30 17:10:03 +0800 CST'>2025-09-30</span>&nbsp;|&nbsp;字数:&nbsp;2915字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to Softmax回归" href="https://eivver.github.io/posts/softmax_regression/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>线性回归
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-09-29 18:45:25 +0800 CST'>2025-09-29</span>&nbsp;|&nbsp;字数:&nbsp;4683字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to 线性回归" href="https://eivver.github.io/posts/linear_regression/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>自动求导
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。
+深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。
+实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。
+自动微分使系统能够随后反向传播梯度。
+这里，反向传播（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。
+
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-09-28 20:33:35 +0800 CST'>2025-09-28</span>&nbsp;|&nbsp;字数:&nbsp;1914字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to 自动求导" href="https://eivver.github.io/posts/autograd/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>数据操作
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        PyTorch中数据操作的一些简单笔记
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-09-12 22:51:19 +0800 CST'>2025-09-12</span>&nbsp;|&nbsp;字数:&nbsp;887字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to 数据操作" href="https://eivver.github.io/posts/data_operations/"></a>
+</article>
+
+
+<article class="post-entry">
+  <div class="post-info">
+    <header class="entry-header">
+      <h2>安装PyTorch踩的坑
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>
+        记录一些在Windows下安装PyTorch踩的坑。
+        ...
+      </p>
+    </section>
+    <footer class="entry-footer">创建:&nbsp;<span title='2025-09-12 21:32:53 +0800 CST'>2025-09-12</span>&nbsp;|&nbsp;字数:&nbsp;444字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</footer>
+  </div> 
+  <a class="entry-link" aria-label="post link to 安装PyTorch踩的坑" href="https://eivver.github.io/posts/install_debug/"></a>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+
+</body>
+
+</html>

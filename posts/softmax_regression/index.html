@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Softmax回归 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="softmax用来解决分类的问题">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/softmax_regression/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/softmax_regression/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/softmax_regression/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="Softmax回归">
+  <meta property="og:description" content="softmax用来解决分类的问题">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-30T17:10:03+08:00">
+    <meta property="article:modified_time" content="2025-09-30T17:10:03+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Softmax回归">
+<meta name="twitter:description" content="softmax用来解决分类的问题">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Softmax回归",
+      "item": "https://eivver.github.io/posts/softmax_regression/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Softmax回归",
+  "name": "Softmax回归",
+  "description": "softmax用来解决分类的问题",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": "回归可以用于预测多少的问题，我们有时候希望预测类别，也就是不再问“多少”，而是问“哪一个”；\n可以把这个问题看作是多个输出的线性回归，每个输出是对应类别的概率。 再根据概率判断该输入属于哪一类。\n1 Softmax模型 1.1 One-hot Encoding 自然界中的类别之间常常是相互无关的，因此首先得找到一个方法去对各个类别进行编码；\nOne-hot Encoding就是一种表示分类数据的简单方法。他是一个向量，它的分量和类别一样多, 类别对应的分量设置为1，其他所有分量设置为0。\n1.2 网络架构 与线性回归一样，softmax回归也是一个单层神经网络。由于计算每个输出$o_1$、$o_2$和$o_3$取决于所有输入$x_1$、$x_2$、$x_3$和$x_4$，所以softmax回归的输出层也是全连接层。\n为了更简洁地表达模型，我们仍然使用线性代数符号。 通过向量形式表达为 $$\\mathbf{o} = \\mathbf{W} \\mathbf{x} + \\mathbf{b}$$\n1.3 Softmax运算 模型的输出层是每一个类别的概率，然后我们的数据集就是对应类别为1，其余类别为0，这样看起来似乎没有问题。\n但是输出$o_1$、$o_2$和$o_3$的范围是不确定的，得通过某种运算将其变成概率，也就是满足都为正数且和为1。\nsoftmax就可以做到，\n首先我们考虑负数的问题，如何把任意数映射到正数呢？可以通过$y = e^x$。 其次，怎么让其和为1呢？将指数变换后的每个数除以所有数的和就可以得到该类别的概率了。\n这样就能够将未规范化的预测变换为非负数并且总和为1，同时让模型保持可导的性质。\n$$\\hat{\\mathbf{y}} = \\mathrm{softmax}(\\mathbf{o})\\quad \\text{其中}\\quad \\hat{y}_j = \\frac{\\exp(o_j)}{\\sum_k \\exp(o_k)}$$\n还有一个问题！\n$o_j$是未规范化的预测$\\mathbf{o}$的第$j$个元素。\n如果$o_k$中的一些数值非常大，那么$\\exp(o_k)$可能大于数据类型容许的最大数字，即上溢（overflow）。\n这将使分母或分子变为inf（无穷大），最后得到的是0、inf或nan（不是数字）的$\\hat y_j$。\n在这些情况下，我们无法得到一个明确定义的交叉熵值。\n解决这个问题的一个技巧是： 在继续softmax计算之前，先从所有$o_k$中减去$\\max(o_k)$。 这里可以看到每个$o_k$按常数进行的移动不会改变softmax的返回值：\n$$ \\begin{aligned} \\hat y_j \u0026 = \\frac{\\exp(o_j - \\max(o_k))\\exp(\\max(o_k))}{\\sum_k \\exp(o_k - \\max(o_k))\\exp(\\max(o_k))} \\\\ \u0026 = \\frac{\\exp(o_j - \\max(o_k))}{\\sum_k \\exp(o_k - \\max(o_k))}. \\end{aligned} $$\n这样就没问题了吗？\n可能有些$o_j - \\max(o_k)$具有较大的负值。 由于精度受限，$\\exp(o_j - \\max(o_k))$将有接近零的值，即下溢（underflow）。 这些值可能会四舍五入为零，使$\\hat y_j$为零， 并且使得$\\log(\\hat y_j)$的值为-inf。 反向传播几步后，我们可能会发现自己面对一屏幕可怕的nan结果。\n解决方法：\n尽管我们要计算指数函数，但我们最终在计算交叉熵损失时会取它们的对数。 通过将softmax和交叉熵结合在一起，可以避免反向传播过程中可能会困扰我们的数值稳定性问题。 如下面的等式所示，我们避免计算$\\exp(o_j - \\max(o_k))$， 而可以直接使用$o_j - \\max(o_k)$，因为$\\log(\\exp(\\cdot))$被抵消了。\n$$ \\begin{aligned} \\log{(\\hat y_j)} \u0026 = \\log\\left( \\frac{\\exp(o_j - \\max(o_k))}{\\sum_k \\exp(o_k - \\max(o_k))}\\right) \\\\ \u0026 = \\log{(\\exp(o_j - \\max(o_k)))}-\\log{\\left( \\sum_k \\exp(o_k - \\max(o_k)) \\right)} \\\\ \u0026 = o_j - \\max(o_k) -\\log{\\left( \\sum_k \\exp(o_k - \\max(o_k)) \\right)}. \\end{aligned} $$\n总之，我们没有将softmax概率传递到损失函数中， 而是在交叉熵损失函数中传递未规范化的预测，并同时计算softmax及其对数，我们也希望保留传统的softmax函数，以备我们需要评估通过模型输出的概率。\n1.4 损失函数 对于任何标签$\\mathbf{y}$和模型预测$\\hat{\\mathbf{y}}$，损失函数为：\n$$ l(\\mathbf{y}, \\hat{\\mathbf{y}}) = - \\sum_{j=1}^q y_j \\log \\hat{y}_j $$\n该损失函数通常被称为交叉熵损失（cross-entropy loss）。\n相当于我们只关注正确类别的概率，想要使其最大化。\n2 模型实现 2.1 数据读取 def load_data_fashion_mnist(batch_size, resize=None): trans = [transforms.ToTensor()] if resize: trans.insert(0,transforms.Resize(resize)) # trans = [transforms.Resize(resize)，transforms.ToTensor()] trans = transforms.Compose(trans) minist_train = torchvision.datasets.FashionMNIST( root = \"../data\", train = True, transform = trans, download = True) minist_test = torchvision.datasets.FashionMNIST( root = \"../data\", train = False, transform = trans, download = True) return (data.DataLoader(minist_train, batch_size, shuffle = True, num_workers = 4), data.DataLoader(minist_test, batch_size, shuffle = True, num_workers = 4)) # 验证一下 train_iter, test_iter = load_data_fashion_mnist(32, resize=64) for X, y in train_iter: print(X.shape, X.dtype, y.shape, y.dtype) 使用data中的Dataloader可以得到一个可迭代对象\n我们在构造数据集的时候多加了一个transform参数，Resize(resize)和ToTensor()分别对图像进行缩放和转成张量。\n值得注意的是，原本的trans只是一个列表，构造完列表后，我们还调用了transforms.Compose()对其进行处理，这一步是把一系列变换函数串起来，组合成一个整体的流水线。\n2.2 搭建模型 模型结构和线性回归类似，只是输入输出的个数不同（输入：图片大小28*28即784，输出：十分类即10）\n但是我们数据集中，图像应该是一个二维数组，要将其挨个输入到第一层的各个单元\n这里可以用展平层nn.Flatten,他会把除 batch 维以外的维度展平\n[batch_size, C, H, W] → [batch_size, C*H*W]\n默认是从第一维展平到最后一维nn.Flatten(start_dim=1, end_dim=-1)\n也可以人为控制展平的范围\nnet = nn.Sequential( nn.Flatten(), nn.Linear(784, 10) ) 搭建完模型就需要初始化权重还是用正态分布初始化\n展平层没有参数不需要管，我们只用初始化Linear层就行\n可以像之前调用net[1].weight.data.normal_(0, 0.01)来初始化\n但是我们其实有更简便的办法\nnn.Module中有一个方法apply，它可以遍历网络中的所有子模块，并对其执行传入的参数\ndef init_weights(m): if type(m) == nn.Linear: nn.init.normal_(m.weight, std = 0.01) net.apply(init_weights) 损失函数——交叉熵\nloss = nn.CrossEntropyLoss(reduction='none') 优化器\ntrainer = torch.optim.SGD(net.parameters(), lr=0.1) 2.3 训练模型 当预测与标签分类y一致时，即是正确的。 分类精度即正确预测数量与总预测数量之比。 虽然直接优化精度可能很困难（因为精度的计算不可导）， 但精度通常是我们最关心的性能衡量标准，我们在训练分类器时几乎总会关注它。所以我们先来实现一个精度计算的函数。\ndef accuracy(y_hat, y): \"\"\"计算预测正确的数量\"\"\" if len(y_hat.shape) \u003e 1 and y_hat.shape[1] \u003e 1: y_hat = y_hat.argmax(axis=1) cmp = y_hat.type(y.dtype) == y return float(cmp.type(y.dtype).sum()) y_hat.shape是一个[batch_size, class_num]，我们只关注每个输入概率最大的类别，因此使用argmax来索引下标，并指定沿着axis=1。\n我们有时候在完成每个epoch（或几个epochs）后，还希望看看模型在验证集上的表现，所以可以再定义一个函数来评估模型。\ndef evaluate_accuracy(net, test_iter): \"\"\"计算在某个数据集上的准确率\"\"\" net.eval() # 将模型设置为评估模式 metric = [0.0, 0.0] # [累计正确数, 累计样本数] with torch.no_grad(): for X, y in test_iter: y_hat = net(X) metric[0] += accuracy(y_hat, y) metric[1] += y.numel() return metric[0] / metric[1] 现在就可以正式开始训练啦\nnum_epochs = 10 for epoch in range(num_epochs): metric = [0.0, 0.0] # [累计损失, 累计正确数] total = 0 net.train() for X, y in train_iter: # 前向传播 y_hat = net(X) l = loss(y_hat, y).sum() # 反向传播 trainer.zero_grad() l.backward() trainer.step() # 统计指标 metric[0] += l.item() metric[1] += accuracy(y_hat, y) total += y.numel() test_acc = evaluate_accuracy(net, test_iter) print(f\"epoch {epoch+1}, loss {metric[0]/total:.4f}, \" f\"train acc {metric[1]/total:.3f},\" f\"test acc {test_acc:.3f}\") 2.4 预测 通过matplotlib绘制图片，看看实际的分类效果\nimport matplotlib.pyplot as plt # 定义显示图像的函数 def show_fashion_mnist(X, y_true, y_pred=None, n=6): \"\"\" X: [batch_size, C, H, W] 或 [batch_size, H, W] y_true: 真实标签列表或张量 y_pred: 预测标签列表或张量，可选 n: 显示前n张图片 \"\"\" X, y_true = X[:n], y_true[:n] if y_pred is not None: y_pred = y_pred[:n] fig, axes = plt.subplots(1, n, figsize=(12, 2)) for i in range(n): img = X[i].squeeze().numpy() # [H, W] axes[i].imshow(img, cmap='gray') title = str(get_fashion_mnist_labels([y_true[i].item()])[0]) if y_pred is not None: title += '\\n' + str(get_fashion_mnist_labels([y_pred[i].item()])[0]) axes[i].set_title(title) axes[i].axis('off') plt.show() # 预测函数 def predict_and_show(net, test_iter, n=6): net.eval() X, y = next(iter(test_iter)) y_hat = net(X).argmax(axis=1) show_fashion_mnist(X, y, y_hat, n) # 调用 predict_and_show(net, test_iter, n=5) ",
+  "wordCount" : "2915",
+  "inLanguage": "zh",
+  "datePublished": "2025-09-30T17:10:03+08:00",
+  "dateModified": "2025-09-30T17:10:03+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/softmax_regression/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                Softmax回归
+            </h1>
+            <div class="post-description">
+                softmax用来解决分类的问题
+            </div>
+            <div class="post-meta">创建:&nbsp;<span title='2025-09-30 17:10:03 +0800 CST'>2025-09-30</span>&nbsp;|&nbsp;字数:&nbsp;2915字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-softmax%e6%a8%a1%e5%9e%8b" aria-label="1 Softmax模型">1 Softmax模型</a><ul>
+                        
+                <li>
+                    <a href="#11-one-hot-encoding" aria-label="1.1 One-hot Encoding">1.1 One-hot Encoding</a></li>
+                <li>
+                    <a href="#12-%e7%bd%91%e7%bb%9c%e6%9e%b6%e6%9e%84" aria-label="1.2 网络架构">1.2 网络架构</a></li>
+                <li>
+                    <a href="#13-softmax%e8%bf%90%e7%ae%97" aria-label="1.3 Softmax运算">1.3 Softmax运算</a></li>
+                <li>
+                    <a href="#14-%e6%8d%9f%e5%a4%b1%e5%87%bd%e6%95%b0" aria-label="1.4 损失函数">1.4 损失函数</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e6%a8%a1%e5%9e%8b%e5%ae%9e%e7%8e%b0" aria-label="2 模型实现">2 模型实现</a><ul>
+                        
+                <li>
+                    <a href="#21-%e6%95%b0%e6%8d%ae%e8%af%bb%e5%8f%96" aria-label="2.1 数据读取">2.1 数据读取</a></li>
+                <li>
+                    <a href="#22-%e6%90%ad%e5%bb%ba%e6%a8%a1%e5%9e%8b" aria-label="2.2 搭建模型">2.2 搭建模型</a></li>
+                <li>
+                    <a href="#23-%e8%ae%ad%e7%bb%83%e6%a8%a1%e5%9e%8b" aria-label="2.3 训练模型">2.3 训练模型</a></li>
+                <li>
+                    <a href="#24-%e9%a2%84%e6%b5%8b" aria-label="2.4 预测">2.4 预测</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><p>回归可以用于预测多少的问题，我们有时候希望预测类别，也就是不再问“多少”，而是问“哪一个”；<br>
+可以把这个问题看作是多个输出的线性回归，每个输出是对应类别的概率。
+再根据概率判断该输入属于哪一类。</p>
+<h2 id="1-softmax模型">1 Softmax模型<a hidden class="anchor" aria-hidden="true" href="#1-softmax模型">#</a></h2>
+<h3 id="11-one-hot-encoding">1.1 One-hot Encoding<a hidden class="anchor" aria-hidden="true" href="#11-one-hot-encoding">#</a></h3>
+<p>自然界中的类别之间常常是相互无关的，因此首先得找到一个方法去对各个类别进行编码；<br>
+<strong>One-hot Encoding</strong>就是一种表示分类数据的简单方法。他是一个向量，它的分量和类别一样多, 类别对应的分量设置为1，其他所有分量设置为0。</p>
+<h3 id="12-网络架构">1.2 网络架构<a hidden class="anchor" aria-hidden="true" href="#12-网络架构">#</a></h3>
+<p>与线性回归一样，softmax回归也是一个单层神经网络。由于计算每个输出$o_1$、$o_2$和$o_3$取决于所有输入$x_1$、$x_2$、$x_3$和$x_4$，所以softmax回归的输出层也是全连接层。</p>
+<p><img alt="Softmax网络架构" loading="lazy" src="/img/softmax_regression/Multi%20Output%20Net.png"></p>
+<p>为了更简洁地表达模型，我们仍然使用线性代数符号。
+通过向量形式表达为
+$$\mathbf{o} = \mathbf{W} \mathbf{x} + \mathbf{b}$$</p>
+<h3 id="13-softmax运算">1.3 Softmax运算<a hidden class="anchor" aria-hidden="true" href="#13-softmax运算">#</a></h3>
+<p>模型的输出层是每一个类别的概率，然后我们的数据集就是对应类别为1，其余类别为0，这样看起来似乎没有问题。<br>
+但是输出$o_1$、$o_2$和$o_3$的范围是不确定的，得通过某种运算将其变成概率，也就是满足都为正数且和为1。<br>
+softmax就可以做到，<br>
+首先我们考虑负数的问题，如何把任意数映射到正数呢？可以通过$y = e^x$。
+其次，怎么让其和为1呢？将指数变换后的每个数除以所有数的和就可以得到该类别的概率了。<br>
+这样就能够将未规范化的预测变换为非负数并且总和为1，同时让模型保持可导的性质。</p>
+<p>$$\hat{\mathbf{y}} = \mathrm{softmax}(\mathbf{o})\quad \text{其中}\quad \hat{y}_j = \frac{\exp(o_j)}{\sum_k \exp(o_k)}$$</p>
+<p>还有一个问题！<br>
+$o_j$是未规范化的预测$\mathbf{o}$的第$j$个元素。<br>
+如果$o_k$中的一些数值非常大，那么$\exp(o_k)$可能大于数据类型容许的最大数字，即<em>上溢</em>（overflow）。<br>
+这将使分母或分子变为<code>inf</code>（无穷大），最后得到的是0、<code>inf</code>或<code>nan</code>（不是数字）的$\hat y_j$。<br>
+在这些情况下，我们无法得到一个明确定义的交叉熵值。</p>
+<p>解决这个问题的一个技巧是：
+在继续softmax计算之前，先从所有$o_k$中减去$\max(o_k)$。
+这里可以看到每个$o_k$按常数进行的移动不会改变softmax的返回值：</p>
+<p>$$
+\begin{aligned}
+\hat y_j &amp; =  \frac{\exp(o_j - \max(o_k))\exp(\max(o_k))}{\sum_k \exp(o_k - \max(o_k))\exp(\max(o_k))} \\
+&amp; = \frac{\exp(o_j - \max(o_k))}{\sum_k \exp(o_k - \max(o_k))}.
+\end{aligned}
+$$</p>
+<p>这样就没问题了吗？<br>
+可能有些$o_j - \max(o_k)$具有较大的负值。
+由于精度受限，$\exp(o_j - \max(o_k))$将有接近零的值，即<em>下溢</em>（underflow）。
+这些值可能会四舍五入为零，使$\hat y_j$为零，
+并且使得$\log(\hat y_j)$的值为<code>-inf</code>。
+反向传播几步后，我们可能会发现自己面对一屏幕可怕的<code>nan</code>结果。</p>
+<p>解决方法：<br>
+尽管我们要计算指数函数，但我们最终在计算交叉熵损失时会取它们的对数。
+通过将softmax和交叉熵结合在一起，可以避免反向传播过程中可能会困扰我们的数值稳定性问题。
+如下面的等式所示，我们避免计算$\exp(o_j - \max(o_k))$，
+而可以直接使用$o_j - \max(o_k)$，因为$\log(\exp(\cdot))$被抵消了。</p>
+<p>$$
+\begin{aligned}
+\log{(\hat y_j)} &amp; = \log\left( \frac{\exp(o_j - \max(o_k))}{\sum_k \exp(o_k - \max(o_k))}\right) \\
+&amp; = \log{(\exp(o_j - \max(o_k)))}-\log{\left( \sum_k \exp(o_k - \max(o_k)) \right)} \\
+&amp; = o_j - \max(o_k) -\log{\left( \sum_k \exp(o_k - \max(o_k)) \right)}.
+\end{aligned}
+$$</p>
+<p><strong>总之，我们没有将softmax概率传递到损失函数中， 而是在交叉熵损失函数中传递未规范化的预测，并同时计算softmax及其对数</strong>，我们也希望保留传统的softmax函数，以备我们需要评估通过模型输出的概率。</p>
+<h3 id="14-损失函数">1.4 损失函数<a hidden class="anchor" aria-hidden="true" href="#14-损失函数">#</a></h3>
+<p>对于任何标签$\mathbf{y}$和模型预测$\hat{\mathbf{y}}$，损失函数为：</p>
+<p>$$ l(\mathbf{y}, \hat{\mathbf{y}}) = - \sum_{j=1}^q y_j \log \hat{y}_j $$</p>
+<p>该损失函数通常被称为<strong>交叉熵损失</strong>（cross-entropy loss）。<br>
+相当于我们只关注正确类别的概率，想要使其最大化。</p>
+<h2 id="2-模型实现">2 模型实现<a hidden class="anchor" aria-hidden="true" href="#2-模型实现">#</a></h2>
+<h3 id="21-数据读取">2.1 数据读取<a hidden class="anchor" aria-hidden="true" href="#21-数据读取">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">load_data_fashion_mnist</span>(batch_size, resize<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    trans <span style="color:#f92672">=</span> [transforms<span style="color:#f92672">.</span>ToTensor()]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> resize:
+</span></span><span style="display:flex;"><span>        trans<span style="color:#f92672">.</span>insert(<span style="color:#ae81ff">0</span>,transforms<span style="color:#f92672">.</span>Resize(resize))
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># trans = [transforms.Resize(resize)，transforms.ToTensor()]</span>
+</span></span><span style="display:flex;"><span>    trans <span style="color:#f92672">=</span> transforms<span style="color:#f92672">.</span>Compose(trans)
+</span></span><span style="display:flex;"><span>    minist_train <span style="color:#f92672">=</span> torchvision<span style="color:#f92672">.</span>datasets<span style="color:#f92672">.</span>FashionMNIST(
+</span></span><span style="display:flex;"><span>        root <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;../data&#34;</span>, train <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, transform <span style="color:#f92672">=</span> trans, download <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    minist_test <span style="color:#f92672">=</span> torchvision<span style="color:#f92672">.</span>datasets<span style="color:#f92672">.</span>FashionMNIST(
+</span></span><span style="display:flex;"><span>        root <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;../data&#34;</span>, train <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>, transform <span style="color:#f92672">=</span> trans, download <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (data<span style="color:#f92672">.</span>DataLoader(minist_train, batch_size, shuffle <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, num_workers <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>),
+</span></span><span style="display:flex;"><span>            data<span style="color:#f92672">.</span>DataLoader(minist_test, batch_size, shuffle <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, num_workers <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 验证一下</span>
+</span></span><span style="display:flex;"><span>train_iter, test_iter <span style="color:#f92672">=</span> load_data_fashion_mnist(<span style="color:#ae81ff">32</span>, resize<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> X, y <span style="color:#f92672">in</span> train_iter:
+</span></span><span style="display:flex;"><span>    print(X<span style="color:#f92672">.</span>shape, X<span style="color:#f92672">.</span>dtype, y<span style="color:#f92672">.</span>shape, y<span style="color:#f92672">.</span>dtype)
+</span></span></code></pre></div><p>使用data中的<code>Dataloader</code>可以得到一个可迭代对象<br>
+我们在构造数据集的时候多加了一个<code>transform</code>参数，<code>Resize(resize)</code>和<code>ToTensor()</code>分别对图像进行缩放和转成张量。<br>
+值得注意的是，原本的trans只是一个列表，构造完列表后，我们还调用了<code>transforms.Compose()</code>对其进行处理，这一步是把一系列变换函数串起来，组合成一个整体的流水线。</p>
+<h3 id="22-搭建模型">2.2 搭建模型<a hidden class="anchor" aria-hidden="true" href="#22-搭建模型">#</a></h3>
+<p>模型结构和线性回归类似，只是输入输出的个数不同（输入：图片大小28*28即784，输出：十分类即10）<br>
+但是我们数据集中，图像应该是一个二维数组，要将其挨个输入到第一层的各个单元<br>
+这里可以用展平层<code>nn.Flatten</code>,他会把除 batch 维以外的维度展平<br>
+[batch_size, C, H, W] → [batch_size, C*H*W]<br>
+默认是从第一维展平到最后一维nn.Flatten(start_dim=1, end_dim=-1)<br>
+也可以人为控制展平的范围</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>net <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Flatten(), 
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>搭建完模型就需要初始化权重还是用正态分布初始化<br>
+展平层没有参数不需要管，我们只用初始化Linear层就行<br>
+可以像之前调用<code>net[1].weight.data.normal_(0, 0.01)</code>来初始化<br>
+但是我们其实有更简便的办法<br>
+<code>nn.Module</code>中有一个方法<code>apply</code>，它可以遍历网络中的所有子模块，并对其执行传入的参数</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_weights</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>normal_(m<span style="color:#f92672">.</span>weight, std <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>net<span style="color:#f92672">.</span>apply(init_weights)
+</span></span></code></pre></div><p>损失函数——交叉熵</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>loss <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>CrossEntropyLoss(reduction<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;none&#39;</span>)
+</span></span></code></pre></div><p>优化器</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>trainer <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>SGD(net<span style="color:#f92672">.</span>parameters(), lr<span style="color:#f92672">=</span><span style="color:#ae81ff">0.1</span>)
+</span></span></code></pre></div><h3 id="23-训练模型">2.3 训练模型<a hidden class="anchor" aria-hidden="true" href="#23-训练模型">#</a></h3>
+<p>当预测与标签分类y一致时，即是正确的。 分类精度即正确预测数量与总预测数量之比。 虽然直接优化精度可能很困难（因为精度的计算不可导）， 但精度通常是我们最关心的性能衡量标准，我们在训练分类器时几乎总会关注它。所以我们先来实现一个精度计算的函数。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">accuracy</span>(y_hat, y):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;计算预测正确的数量&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(y_hat<span style="color:#f92672">.</span>shape) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">and</span> y_hat<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>        y_hat <span style="color:#f92672">=</span> y_hat<span style="color:#f92672">.</span>argmax(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    cmp <span style="color:#f92672">=</span> y_hat<span style="color:#f92672">.</span>type(y<span style="color:#f92672">.</span>dtype) <span style="color:#f92672">==</span> y
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> float(cmp<span style="color:#f92672">.</span>type(y<span style="color:#f92672">.</span>dtype)<span style="color:#f92672">.</span>sum())
+</span></span></code></pre></div><p>y_hat.shape是一个[batch_size, class_num]，我们只关注每个输入概率最大的类别，因此使用argmax来索引下标，并指定沿着axis=1。</p>
+<p>我们有时候在完成每个epoch（或几个epochs）后，还希望看看模型在验证集上的表现，所以可以再定义一个函数来评估模型。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">evaluate_accuracy</span>(net, test_iter):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;计算在某个数据集上的准确率&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>eval()              <span style="color:#75715e"># 将模型设置为评估模式</span>
+</span></span><span style="display:flex;"><span>    metric <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0.0</span>, <span style="color:#ae81ff">0.0</span>]     <span style="color:#75715e"># [累计正确数, 累计样本数]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> torch<span style="color:#f92672">.</span>no_grad():
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> X, y <span style="color:#f92672">in</span> test_iter:
+</span></span><span style="display:flex;"><span>            y_hat <span style="color:#f92672">=</span> net(X)
+</span></span><span style="display:flex;"><span>            metric[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">+=</span> accuracy(y_hat, y)
+</span></span><span style="display:flex;"><span>            metric[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">+=</span> y<span style="color:#f92672">.</span>numel()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> metric[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">/</span> metric[<span style="color:#ae81ff">1</span>]
+</span></span></code></pre></div><p>现在就可以正式开始训练啦</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>num_epochs <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> epoch <span style="color:#f92672">in</span> range(num_epochs):
+</span></span><span style="display:flex;"><span>    metric <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0.0</span>, <span style="color:#ae81ff">0.0</span>]  <span style="color:#75715e"># [累计损失, 累计正确数]</span>
+</span></span><span style="display:flex;"><span>    total <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>train()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> X, y <span style="color:#f92672">in</span> train_iter:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 前向传播</span>
+</span></span><span style="display:flex;"><span>        y_hat <span style="color:#f92672">=</span> net(X)
+</span></span><span style="display:flex;"><span>        l <span style="color:#f92672">=</span> loss(y_hat, y)<span style="color:#f92672">.</span>sum()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 反向传播</span>
+</span></span><span style="display:flex;"><span>        trainer<span style="color:#f92672">.</span>zero_grad()
+</span></span><span style="display:flex;"><span>        l<span style="color:#f92672">.</span>backward()
+</span></span><span style="display:flex;"><span>        trainer<span style="color:#f92672">.</span>step()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 统计指标</span>
+</span></span><span style="display:flex;"><span>        metric[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">+=</span> l<span style="color:#f92672">.</span>item()
+</span></span><span style="display:flex;"><span>        metric[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">+=</span> accuracy(y_hat, y)
+</span></span><span style="display:flex;"><span>        total <span style="color:#f92672">+=</span> y<span style="color:#f92672">.</span>numel()
+</span></span><span style="display:flex;"><span>    test_acc <span style="color:#f92672">=</span> evaluate_accuracy(net, test_iter)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;epoch </span><span style="color:#e6db74">{</span>epoch<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, loss </span><span style="color:#e6db74">{</span>metric[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">/</span>total<span style="color:#e6db74">:</span><span style="color:#e6db74">.4f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, &#34;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;train acc </span><span style="color:#e6db74">{</span>metric[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">/</span>total<span style="color:#e6db74">:</span><span style="color:#e6db74">.3f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">,&#34;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;test acc </span><span style="color:#e6db74">{</span>test_acc<span style="color:#e6db74">:</span><span style="color:#e6db74">.3f</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span></code></pre></div><h3 id="24-预测">2.4 预测<a hidden class="anchor" aria-hidden="true" href="#24-预测">#</a></h3>
+<p>通过matplotlib绘制图片，看看实际的分类效果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义显示图像的函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">show_fashion_mnist</span>(X, y_true, y_pred<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, n<span style="color:#f92672">=</span><span style="color:#ae81ff">6</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    X: [batch_size, C, H, W] 或 [batch_size, H, W]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    y_true: 真实标签列表或张量
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    y_pred: 预测标签列表或张量，可选
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    n: 显示前n张图片
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    X, y_true <span style="color:#f92672">=</span> X[:n], y_true[:n]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> y_pred <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        y_pred <span style="color:#f92672">=</span> y_pred[:n]
+</span></span><span style="display:flex;"><span>    fig, axes <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>subplots(<span style="color:#ae81ff">1</span>, n, figsize<span style="color:#f92672">=</span>(<span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n):
+</span></span><span style="display:flex;"><span>        img <span style="color:#f92672">=</span> X[i]<span style="color:#f92672">.</span>squeeze()<span style="color:#f92672">.</span>numpy()  <span style="color:#75715e"># [H, W] </span>
+</span></span><span style="display:flex;"><span>        axes[i]<span style="color:#f92672">.</span>imshow(img, cmap<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gray&#39;</span>)
+</span></span><span style="display:flex;"><span>        title <span style="color:#f92672">=</span> str(get_fashion_mnist_labels([y_true[i]<span style="color:#f92672">.</span>item()])[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> y_pred <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>            title <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">+</span> str(get_fashion_mnist_labels([y_pred[i]<span style="color:#f92672">.</span>item()])[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>        axes[i]<span style="color:#f92672">.</span>set_title(title)
+</span></span><span style="display:flex;"><span>        axes[i]<span style="color:#f92672">.</span>axis(<span style="color:#e6db74">&#39;off&#39;</span>)
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>show()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 预测函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict_and_show</span>(net, test_iter, n<span style="color:#f92672">=</span><span style="color:#ae81ff">6</span>):
+</span></span><span style="display:flex;"><span>    net<span style="color:#f92672">.</span>eval()
+</span></span><span style="display:flex;"><span>    X, y <span style="color:#f92672">=</span> next(iter(test_iter))
+</span></span><span style="display:flex;"><span>    y_hat <span style="color:#f92672">=</span> net(X)<span style="color:#f92672">.</span>argmax(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    show_fashion_mnist(X, y, y_hat, n)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 调用</span>
+</span></span><span style="display:flex;"><span>predict_and_show(net, test_iter, n<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>)
+</span></span></code></pre></div><p><img alt="预测结果" loading="lazy" src="/img/softmax_regression/predict.svg"></p>
+
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/multilayer_perceptron/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>多层感知机</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/linear_regression/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>线性回归</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

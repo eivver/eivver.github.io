@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tag1 on eivver&#39;s Blog</title>
+    <link>http://www.eivver.xyz/tags/tag1/</link>
+    <description>Recent content in Tag1 on eivver&#39;s Blog</description>
+    <generator>Hugo -- 0.149.1</generator>
+    <language>zh</language>
+    <lastBuildDate>Tue, 25 Nov 2025 11:33:14 +0800</lastBuildDate>
+    <atom:link href="http://www.eivver.xyz/tags/tag1/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Transformer</title>
+      <link>http://www.eivver.xyz/posts/transformer/</link>
+      <pubDate>Tue, 25 Nov 2025 11:33:14 +0800</pubDate>
+      <guid>http://www.eivver.xyz/posts/transformer/</guid>
+      <description>Transformer是一种采用注意力机制的深度学习架构，这一机制可以按输入数据各部分重要性的不同而分配不同的权重。于2017年由谷歌大脑的一个团队在论文《Attention Is All You Need》中提出，现已逐步取代长短期记忆（LSTM）等RNN模型成为了NLP问题的首选模型。并行化优势允许其在更大的数据集上进行训练。这也促成了BERT、GPT等预训练模型的发展。  </description>
+    </item>
+  </channel>
+</rss>

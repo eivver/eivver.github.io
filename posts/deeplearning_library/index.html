@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>深度学习计算 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/deeplearning_library/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/deeplearning_library/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/deeplearning_library/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="深度学习计算">
+  <meta property="og:description" content="涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-10-02T15:31:23+08:00">
+    <meta property="article:modified_time" content="2025-10-02T15:31:23+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深度学习计算">
+<meta name="twitter:description" content="涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "深度学习计算",
+      "item": "https://eivver.github.io/posts/deeplearning_library/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "深度学习计算",
+  "name": "深度学习计算",
+  "description": "涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": "1 自定义块和层 1.1 自定义块 复杂的网络，通常会有很多复用的模块，为了方便模型的表示，引入了块的概念。\n它可以描述单个层或是由多个层组成的组件。\n一个块通常只需要提供构造函数和前向传播函数，除非我们实现一个新的运算符， 否则我们不必担心反向传播函数或参数初始化， 系统将自动生成这些。\n# 自定义块 class MLP(nn.Module): def __init__(self): super().__init__() self.hidden = nn.Linear(20, 256) self.output = nn.Linear(256, 10) def forward(self, X): return self.output(F.relu(self.hidden(X))) 继承自nn.Module 要先调用父类的初始化函数super().__init__() 在每次调用前向传播函数时调用实例化的层 F.relu是激活函数的函数形式 之前使用的Sequential类其实也可以看作是一个块，里面的各层是按顺序堆叠的。\n其实里面就实现了两个关键函数：\n将块/层逐个添加到列表 将输入按追加块/层的顺序传递 class MySequential(nn.Module): def __init__(self, *args): super().__init__() for idx, module in enumerate(args): self._modules[str(idx)] = module def forward(self, X): for module in self._modules.values(): X = module(X) return X *arg接受任意个位置参数，并把它们打包成一个元组 enumerate返回带下标的迭代器 nn.Module内部有一个特殊的字典：self._modules，用来存放子模块 并不是所有的架构都是简单的顺序架构，我们可能希望在前向传播函数中执行Python的控制流\n或者是在某一层加入一个常量之类的操作\n自定义块都是允许的\nclass FancyMLP(nn.Module): def __init__(self): super().__init__() self.rand_weight = torch.rand((20, 20), requires_grad=False) self.linear = nn.Linear(20, 20) def forward(self, x): x = self.linear(x) x = F.relu(torch.mm(x, self.rand_weight) + 1) x = self.linear(x) while x.abs().sum() \u003e 1: x /= 2 if x.norm().sum() \u003c 1: x *= 10 return x.sum() 1.2 自定义层 自定义层和自定义块其实没有严格的界限，主要是语义上的区别。\n他们都是继承自nn.Module\n要构建自定义层，我们只需继承基础层类并实现前向传播功能。\nclass CenteredLayer(nn.Module): def __init__(self): super().__init__() def forward(self, x): return x - x.mean() 2 参数管理 2.1 参数访问 2.1.1 访问目标参数 当我们通过Sequential来定义模型的时候，我们可以通过索引来访问模型的任意层，就像一个列表一样\n比如我们想访问第三层的参数：print(net[2].state_dict())\n在PyTorch中，模型的科学系参数和缓冲区都保存在一个字典state_dict中\n调用state_dict()会返回一个有序字典，保存了所有参数（权重、偏置）和缓冲（如 BatchNorm 的均值方差）。\n注意：state_dict 只保存参数和缓冲区，不保存模型的结构或 forward 函数。常用来保存或者加载模型参数。\n参数是复合的torch.nn.Parameter对象，包含值、梯度和额外信息。\nprint(net[1].weight.data) # 访问权重的值 print(net[1].bias.grad) # 访问偏置的梯度 print(net[0].hidden.weight.data) # 对于块内参数访问 2.1.2 访问全部参数 当我们需要对所有参数执行操作时，逐个访问它们可能会很麻烦。 当我们处理更复杂的块（例如，嵌套块）时，情况可能会变得特别复杂， 因为我们需要递归整个树来提取每个子块的参数。\nmodel.parameters()会返回一个迭代器，包含模型中所有需要梯度的参数（nn.Parameter），一般是把这个丢给优化器。\n对于我们访问参数更常用的是model.named_parameters()，会返回\"参数名字+参数\"更方便的定位。\n# 访问第一个全连接层的参数 print(*[(name, param.shape) for name, param in net[0].named_parameters()]) # 访问整个网络的参数 print(*[(name, param.shape) for name, param in net.named_parameters()]) model.named_parameters()返回一个迭代器 (name, param.shape) for name, param in net.named_parameters()是一个生成器，需要用列表接收它 *[...]解包列表里的东西 2.1.3 访问嵌套块里的参数 先把模型结构打印出来\nSequential( (0): MLP( (hidden): Linear(in_features=20, out_features=256, bias=True) (output): Linear(in_features=256, out_features=10, bias=True) ) (1): Linear(in_features=10, out_features=20, bias=True) (2): Sequential( (0): MLP( (hidden): Linear(in_features=20, out_features=256, bias=True) (output): Linear(in_features=256, out_features=10, bias=True) ) (1): Linear(in_features=10, out_features=20, bias=True) ) (3): FancyMLP( (linear): Linear(in_features=20, out_features=20, bias=True) ) (4): CenteredLayer() ) 第三层，即(2): Sequential，其实是个块，里面还嵌套了(0): MLP\n所以可以用索引访问子模块\nprint(net[2][0].hidden.weight.data) # 访问嵌套块的第一个块 2.2 参数初始化 深度学习框架提供默认随机初始化， 也允许我们创建自定义初始化方法， 满足我们通过其他规则实现初始化权重。\nPyTorch的nn.init模块提供了多种预置初始化方法。\n将权重初始化为标准差为0.01的高斯随机变量\ndef init_normal(m): if type(m) == nn.Linear: nn.init.normal_(m.weight, mean=0, std=0.01) nn.init.zeros_(m.bias) 初始化为给定的常数\ndef init_constant(m): if type(m) == nn.Linear: nn.init.constant_(m.weight, 1) nn.init.zeros_(m.bias) Xavier初始化方法\ndef init_xavier(m): if type(m) == nn.Linear: nn.init.xavier_uniform_(m.weight) 我们也可以自定义任意的初始化方法\ndef my_init(m): if type(m) == nn.Linear: print(\"Init\", *[(name, param.shape) for name, param in m.named_parameters()][0]) nn.init.uniform_(m.weight, -10, 10) m.weight.data *= m.weight.data.abs() \u003e= 5 2.3 共享参数 其实就是让多个层的名字一样这样他们就会使用一样的参数\nshared = nn.Linear(8, 8) net = nn.Sequential(nn.Linear(4, 8), nn.ReLU(), shared, nn.ReLU(), shared, nn.ReLU(), nn.Linear(8, 1)) 如果我们改变其中一个参数，另一个参数也会改变。\n注意：在反向传播的时候两个层的梯度会累加，然后在调用优化器更新参数的时候，会根据已累加的梯度对这个共享层的参数进行更新。\n3 延后初始化 延迟初始化很方便，允许框架自动推断参数形状，从而轻松修改架构。\nnet = nn.Sequential(nn.LazyLinear(256), nn.ReLU(), nn.LazyLinear(10)) 4 读写文件 4.1 张量读写 torch.save和torch.load就可以读写张量。\nx = torch.arange(4) print(x) torch.save(x, 'x-file') x2 = torch.load('x-file') print(x2) 4.2 模型参数读写 由于net.state_dict()只会保存参数的字典和值，不会保存结构\n因此我们需要实例化一个内部结构一样的模型，才能加载\nnet = MLP() torch.save(net.state_dict(), 'mlp.params') net2 = MLP() net2.load_state_dict(torch.load('mlp.params')) net2.eval() 5 GPU加速 GPU可以极大加速模型的运行速度。\n我们可以通过print(torch.cuda.is_available())查看有无可用的GPU\n通过以下函数我们可以同时兼顾GPU和CPU环境（但是对于稍大一点的模型通常在CPU计算的速度非常感人）\ndef try_gpu(i=0): \"\"\"如果存在，则返回gpu(i)，否则返回cpu()\"\"\" if torch.cuda.device_count() \u003e= i + 1: return torch.device(f'cuda:{i}') return torch.device('cpu') 为了加速计算，我们需要把模型和数据放在同一个gpu上，\n可以在定义的时候就指定设备，也可以在定义完后使用to()将张量/模型转移到指定设备上。\nX = torch.ones(2, 3, device=try_gpu()) net = net.to(device=try_gpu()) ",
+  "wordCount" : "2178",
+  "inLanguage": "zh",
+  "datePublished": "2025-10-02T15:31:23+08:00",
+  "dateModified": "2025-10-02T15:31:23+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/deeplearning_library/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                深度学习计算
+            </h1>
+            <div class="post-description">
+                涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速
+            </div>
+            <div class="post-meta">创建:&nbsp;<span title='2025-10-02 15:31:23 +0800 CST'>2025-10-02</span>&nbsp;|&nbsp;字数:&nbsp;2178字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e8%87%aa%e5%ae%9a%e4%b9%89%e5%9d%97%e5%92%8c%e5%b1%82" aria-label="1 自定义块和层">1 自定义块和层</a><ul>
+                        
+                <li>
+                    <a href="#11-%e8%87%aa%e5%ae%9a%e4%b9%89%e5%9d%97" aria-label="1.1 自定义块">1.1 自定义块</a></li>
+                <li>
+                    <a href="#12-%e8%87%aa%e5%ae%9a%e4%b9%89%e5%b1%82" aria-label="1.2 自定义层">1.2 自定义层</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e5%8f%82%e6%95%b0%e7%ae%a1%e7%90%86" aria-label="2 参数管理">2 参数管理</a><ul>
+                        
+                <li>
+                    <a href="#21-%e5%8f%82%e6%95%b0%e8%ae%bf%e9%97%ae" aria-label="2.1 参数访问">2.1 参数访问</a></li>
+                <li>
+                    <a href="#211-%e8%ae%bf%e9%97%ae%e7%9b%ae%e6%a0%87%e5%8f%82%e6%95%b0" aria-label="2.1.1 访问目标参数">2.1.1 访问目标参数</a></li>
+                <li>
+                    <a href="#212-%e8%ae%bf%e9%97%ae%e5%85%a8%e9%83%a8%e5%8f%82%e6%95%b0" aria-label="2.1.2 访问全部参数">2.1.2 访问全部参数</a></li>
+                <li>
+                    <a href="#213-%e8%ae%bf%e9%97%ae%e5%b5%8c%e5%a5%97%e5%9d%97%e9%87%8c%e7%9a%84%e5%8f%82%e6%95%b0" aria-label="2.1.3 访问嵌套块里的参数">2.1.3 访问嵌套块里的参数</a></li>
+                <li>
+                    <a href="#22-%e5%8f%82%e6%95%b0%e5%88%9d%e5%a7%8b%e5%8c%96" aria-label="2.2 参数初始化">2.2 参数初始化</a></li>
+                <li>
+                    <a href="#23-%e5%85%b1%e4%ba%ab%e5%8f%82%e6%95%b0" aria-label="2.3 共享参数">2.3 共享参数</a></li></ul>
+                </li>
+                <li>
+                    <a href="#3-%e5%bb%b6%e5%90%8e%e5%88%9d%e5%a7%8b%e5%8c%96" aria-label="3 延后初始化">3 延后初始化</a></li>
+                <li>
+                    <a href="#4-%e8%af%bb%e5%86%99%e6%96%87%e4%bb%b6" aria-label="4 读写文件">4 读写文件</a><ul>
+                        
+                <li>
+                    <a href="#41-%e5%bc%a0%e9%87%8f%e8%af%bb%e5%86%99" aria-label="4.1 张量读写">4.1 张量读写</a></li>
+                <li>
+                    <a href="#42-%e6%a8%a1%e5%9e%8b%e5%8f%82%e6%95%b0%e8%af%bb%e5%86%99" aria-label="4.2 模型参数读写">4.2 模型参数读写</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-gpu%e5%8a%a0%e9%80%9f" aria-label="5 GPU加速">5 GPU加速</a>
+                </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><h2 id="1-自定义块和层">1 自定义块和层<a hidden class="anchor" aria-hidden="true" href="#1-自定义块和层">#</a></h2>
+<h3 id="11-自定义块">1.1 自定义块<a hidden class="anchor" aria-hidden="true" href="#11-自定义块">#</a></h3>
+<p>复杂的网络，通常会有很多复用的模块，为了方便模型的表示，引入了块的概念。<br>
+它可以描述单个层或是由多个层组成的组件。<br>
+一个块通常只需要提供构造函数和前向传播函数，除非我们实现一个新的运算符， 否则我们不必担心反向传播函数或参数初始化， 系统将自动生成这些。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 自定义块</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MLP</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self):
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>()
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>hidden <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">256</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>output <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, X):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>output(F<span style="color:#f92672">.</span>relu(self<span style="color:#f92672">.</span>hidden(X)))
+</span></span></code></pre></div><ul>
+<li>继承自nn.Module</li>
+<li>要先调用父类的初始化函数<code>super().__init__()</code></li>
+<li>在每次调用前向传播函数时调用实例化的层</li>
+<li><code>F.relu</code>是激活函数的函数形式</li>
+</ul>
+<p>之前使用的Sequential类其实也可以看作是一个块，里面的各层是按顺序堆叠的。<br>
+其实里面就实现了两个关键函数：</p>
+<ul>
+<li>将块/层逐个添加到列表</li>
+<li>将输入按追加块/层的顺序传递</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MySequential</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, <span style="color:#f92672">*</span>args):
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> idx, module <span style="color:#f92672">in</span> enumerate(args):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_modules[str(idx)] <span style="color:#f92672">=</span> module
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, X):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> module <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>_modules<span style="color:#f92672">.</span>values():
+</span></span><span style="display:flex;"><span>            X <span style="color:#f92672">=</span> module(X)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> X
+</span></span></code></pre></div><ul>
+<li><code>*arg</code>接受任意个位置参数，并把它们打包成一个元组</li>
+<li><code>enumerate</code>返回带下标的迭代器</li>
+<li><code>nn.Module</code>内部有一个特殊的字典：<code>self._modules</code>，用来存放子模块</li>
+</ul>
+<p>并不是所有的架构都是简单的顺序架构，我们可能希望在前向传播函数中执行Python的控制流<br>
+或者是在某一层加入一个常量之类的操作<br>
+自定义块都是允许的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FancyMLP</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self):
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>()
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>rand_weight <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>rand((<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>), requires_grad<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>linear <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, x):
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>linear(x)
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> F<span style="color:#f92672">.</span>relu(torch<span style="color:#f92672">.</span>mm(x, self<span style="color:#f92672">.</span>rand_weight) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>linear(x)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> x<span style="color:#f92672">.</span>abs()<span style="color:#f92672">.</span>sum() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">/=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> x<span style="color:#f92672">.</span>norm()<span style="color:#f92672">.</span>sum() <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">*=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x<span style="color:#f92672">.</span>sum()
+</span></span></code></pre></div><h3 id="12-自定义层">1.2 自定义层<a hidden class="anchor" aria-hidden="true" href="#12-自定义层">#</a></h3>
+<p>自定义层和自定义块其实没有严格的界限，主要是语义上的区别。<br>
+他们都是继承自<code>nn.Module</code><br>
+要构建自定义层，我们只需继承基础层类并实现前向传播功能。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CenteredLayer</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self):
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(self, x):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x <span style="color:#f92672">-</span> x<span style="color:#f92672">.</span>mean()
+</span></span></code></pre></div><h2 id="2-参数管理">2 参数管理<a hidden class="anchor" aria-hidden="true" href="#2-参数管理">#</a></h2>
+<h3 id="21-参数访问">2.1 参数访问<a hidden class="anchor" aria-hidden="true" href="#21-参数访问">#</a></h3>
+<h3 id="211-访问目标参数">2.1.1 访问目标参数<a hidden class="anchor" aria-hidden="true" href="#211-访问目标参数">#</a></h3>
+<p>当我们通过<code>Sequential</code>来定义模型的时候，我们可以通过索引来访问模型的任意层，就像一个列表一样<br>
+比如我们想访问第三层的参数：<code>print(net[2].state_dict())</code><br>
+在PyTorch中，<strong>模型的科学系参数和缓冲区</strong>都保存在一个字典<code>state_dict</code>中<br>
+调用<code>state_dict()</code>会返回一个有序字典，保存了所有参数（权重、偏置）和缓冲（如 BatchNorm 的均值方差）。<br>
+注意：<code>state_dict</code> 只保存参数和缓冲区，不保存模型的结构或 forward 函数。常用来保存或者加载模型参数。</p>
+<p>参数是复合的<code>torch.nn.Parameter</code>对象，包含值、梯度和额外信息。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(net[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>weight<span style="color:#f92672">.</span>data)           <span style="color:#75715e"># 访问权重的值</span>
+</span></span><span style="display:flex;"><span>print(net[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>bias<span style="color:#f92672">.</span>grad)             <span style="color:#75715e"># 访问偏置的梯度</span>
+</span></span><span style="display:flex;"><span>print(net[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>hidden<span style="color:#f92672">.</span>weight<span style="color:#f92672">.</span>data)    <span style="color:#75715e"># 对于块内参数访问</span>
+</span></span></code></pre></div><h3 id="212-访问全部参数">2.1.2 访问全部参数<a hidden class="anchor" aria-hidden="true" href="#212-访问全部参数">#</a></h3>
+<p>当我们需要对所有参数执行操作时，逐个访问它们可能会很麻烦。 当我们处理更复杂的块（例如，嵌套块）时，情况可能会变得特别复杂， 因为我们需要递归整个树来提取每个子块的参数。<br>
+<code>model.parameters()</code>会返回一个迭代器，包含模型中所有需要梯度的参数（nn.Parameter），一般是把这个丢给优化器。<br>
+对于我们访问参数更常用的是<code>model.named_parameters()</code>，会返回&quot;参数名字+参数&quot;更方便的定位。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 访问第一个全连接层的参数</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#f92672">*</span>[(name, param<span style="color:#f92672">.</span>shape) <span style="color:#66d9ef">for</span> name, param <span style="color:#f92672">in</span> net[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>named_parameters()])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 访问整个网络的参数</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#f92672">*</span>[(name, param<span style="color:#f92672">.</span>shape) <span style="color:#66d9ef">for</span> name, param <span style="color:#f92672">in</span> net<span style="color:#f92672">.</span>named_parameters()])
+</span></span></code></pre></div><ul>
+<li><code>model.named_parameters()</code>返回一个迭代器</li>
+<li><code>(name, param.shape) for name, param in net.named_parameters()</code>是一个生成器，需要用列表接收它</li>
+<li><code>*[...]</code>解包列表里的东西</li>
+</ul>
+<h3 id="213-访问嵌套块里的参数">2.1.3 访问嵌套块里的参数<a hidden class="anchor" aria-hidden="true" href="#213-访问嵌套块里的参数">#</a></h3>
+<p>先把模型结构打印出来</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>Sequential(
+</span></span><span style="display:flex;"><span>  (0): MLP(
+</span></span><span style="display:flex;"><span>    (hidden): Linear(in_features=20, out_features=256, bias=True)
+</span></span><span style="display:flex;"><span>    (output): Linear(in_features=256, out_features=10, bias=True)
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>  (1): Linear(in_features=10, out_features=20, bias=True)
+</span></span><span style="display:flex;"><span>  (2): Sequential(
+</span></span><span style="display:flex;"><span>    (0): MLP(
+</span></span><span style="display:flex;"><span>      (hidden): Linear(in_features=20, out_features=256, bias=True)
+</span></span><span style="display:flex;"><span>      (output): Linear(in_features=256, out_features=10, bias=True)
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    (1): Linear(in_features=10, out_features=20, bias=True)
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>  (3): FancyMLP(
+</span></span><span style="display:flex;"><span>    (linear): Linear(in_features=20, out_features=20, bias=True)
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>  (4): CenteredLayer()
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>第三层，即(2): Sequential，其实是个块，里面还嵌套了(0): MLP<br>
+所以可以用索引访问子模块</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(net[<span style="color:#ae81ff">2</span>][<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>hidden<span style="color:#f92672">.</span>weight<span style="color:#f92672">.</span>data)  <span style="color:#75715e"># 访问嵌套块的第一个块</span>
+</span></span></code></pre></div><h3 id="22-参数初始化">2.2 参数初始化<a hidden class="anchor" aria-hidden="true" href="#22-参数初始化">#</a></h3>
+<p>深度学习框架提供默认随机初始化， 也允许我们创建自定义初始化方法， 满足我们通过其他规则实现初始化权重。<br>
+PyTorch的nn.init模块提供了多种预置初始化方法。<br>
+将权重初始化为标准差为0.01的高斯随机变量</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_normal</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>normal_(m<span style="color:#f92672">.</span>weight, mean<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, std<span style="color:#f92672">=</span><span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>zeros_(m<span style="color:#f92672">.</span>bias)
+</span></span></code></pre></div><p>初始化为给定的常数</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_constant</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>constant_(m<span style="color:#f92672">.</span>weight, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>zeros_(m<span style="color:#f92672">.</span>bias)
+</span></span></code></pre></div><p>Xavier初始化方法</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_xavier</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>xavier_uniform_(m<span style="color:#f92672">.</span>weight)
+</span></span></code></pre></div><p>我们也可以自定义任意的初始化方法</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">my_init</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;Init&#34;</span>, <span style="color:#f92672">*</span>[(name, param<span style="color:#f92672">.</span>shape)
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">for</span> name, param <span style="color:#f92672">in</span> m<span style="color:#f92672">.</span>named_parameters()][<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>uniform_(m<span style="color:#f92672">.</span>weight, <span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>        m<span style="color:#f92672">.</span>weight<span style="color:#f92672">.</span>data <span style="color:#f92672">*=</span> m<span style="color:#f92672">.</span>weight<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>abs() <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">5</span>
+</span></span></code></pre></div><h3 id="23-共享参数">2.3 共享参数<a hidden class="anchor" aria-hidden="true" href="#23-共享参数">#</a></h3>
+<p>其实就是让多个层的名字一样这样他们就会使用一样的参数</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>shared <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">8</span>), nn<span style="color:#f92672">.</span>ReLU(),
+</span></span><span style="display:flex;"><span>                    shared, nn<span style="color:#f92672">.</span>ReLU(),
+</span></span><span style="display:flex;"><span>                    shared, nn<span style="color:#f92672">.</span>ReLU(),
+</span></span><span style="display:flex;"><span>                    nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">1</span>))
+</span></span></code></pre></div><p>如果我们改变其中一个参数，另一个参数也会改变。<br>
+注意：在反向传播的时候两个层的梯度会累加，然后在调用优化器更新参数的时候，会根据已累加的梯度对这个共享层的参数进行更新。</p>
+<h2 id="3-延后初始化">3 延后初始化<a hidden class="anchor" aria-hidden="true" href="#3-延后初始化">#</a></h2>
+<p>延迟初始化很方便，允许框架自动推断参数形状，从而轻松修改架构。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>net <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(nn<span style="color:#f92672">.</span>LazyLinear(<span style="color:#ae81ff">256</span>), nn<span style="color:#f92672">.</span>ReLU(), nn<span style="color:#f92672">.</span>LazyLinear(<span style="color:#ae81ff">10</span>))
+</span></span></code></pre></div><h2 id="4-读写文件">4 读写文件<a hidden class="anchor" aria-hidden="true" href="#4-读写文件">#</a></h2>
+<h3 id="41-张量读写">4.1 张量读写<a hidden class="anchor" aria-hidden="true" href="#41-张量读写">#</a></h3>
+<p><code>torch.save和torch.load</code>就可以读写张量。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>x <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>print(x)
+</span></span><span style="display:flex;"><span>torch<span style="color:#f92672">.</span>save(x, <span style="color:#e6db74">&#39;x-file&#39;</span>)
+</span></span><span style="display:flex;"><span>x2 <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>load(<span style="color:#e6db74">&#39;x-file&#39;</span>)
+</span></span><span style="display:flex;"><span>print(x2)
+</span></span></code></pre></div><h3 id="42-模型参数读写">4.2 模型参数读写<a hidden class="anchor" aria-hidden="true" href="#42-模型参数读写">#</a></h3>
+<p>由于<code>net.state_dict()</code>只会保存参数的字典和值，不会保存结构<br>
+因此我们需要实例化一个内部结构一样的模型，才能加载</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>net <span style="color:#f92672">=</span> MLP()
+</span></span><span style="display:flex;"><span>torch<span style="color:#f92672">.</span>save(net<span style="color:#f92672">.</span>state_dict(), <span style="color:#e6db74">&#39;mlp.params&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>net2 <span style="color:#f92672">=</span> MLP()
+</span></span><span style="display:flex;"><span>net2<span style="color:#f92672">.</span>load_state_dict(torch<span style="color:#f92672">.</span>load(<span style="color:#e6db74">&#39;mlp.params&#39;</span>))
+</span></span><span style="display:flex;"><span>net2<span style="color:#f92672">.</span>eval()
+</span></span></code></pre></div><h2 id="5-gpu加速">5 GPU加速<a hidden class="anchor" aria-hidden="true" href="#5-gpu加速">#</a></h2>
+<p>GPU可以极大加速模型的运行速度。<br>
+我们可以通过<code>print(torch.cuda.is_available())</code>查看有无可用的GPU</p>
+<p>通过以下函数我们可以同时兼顾GPU和CPU环境（但是对于稍大一点的模型通常在CPU计算的速度非常感人）</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">try_gpu</span>(i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;如果存在，则返回gpu(i)，否则返回cpu()&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> torch<span style="color:#f92672">.</span>cuda<span style="color:#f92672">.</span>device_count() <span style="color:#f92672">&gt;=</span> i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> torch<span style="color:#f92672">.</span>device(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;cuda:</span><span style="color:#e6db74">{</span>i<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> torch<span style="color:#f92672">.</span>device(<span style="color:#e6db74">&#39;cpu&#39;</span>)
+</span></span></code></pre></div><p>为了加速计算，我们需要把模型和数据放在同一个gpu上，<br>
+可以在定义的时候就指定设备，也可以在定义完后使用<code>to()</code>将张量/模型转移到指定设备上。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>X <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>ones(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, device<span style="color:#f92672">=</span>try_gpu())
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> net<span style="color:#f92672">.</span>to(device<span style="color:#f92672">=</span>try_gpu())
+</span></span></code></pre></div>
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/cnn/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>卷积神经网络</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/multilayer_perceptron/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>多层感知机</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

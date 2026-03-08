@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>多层感知机 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/multilayer_perceptron/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/multilayer_perceptron/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/multilayer_perceptron/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="多层感知机">
+  <meta property="og:description" content="多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-30T22:10:25+08:00">
+    <meta property="article:modified_time" content="2025-09-30T22:10:25+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="多层感知机">
+<meta name="twitter:description" content="多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "多层感知机",
+      "item": "https://eivver.github.io/posts/multilayer_perceptron/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "多层感知机",
+  "name": "多层感知机",
+  "description": "多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": "1 模型结构 线性回归只有一层，且只能表示线性关系，这样的模型表达能力很有限。\n很自然地，我们会想能不能增加网络的层数，将多个连接层堆叠，中间的层就叫隐藏层。 这样就能增强模型的表达能力了吗？\n并不是，因为每一层都是线性的，最终也还是线性的，所以多层网络最终也可以变换成一层。\n对于任意权重值， 我们只需合并隐藏层，便可产生具有参数 $\\mathbf{W} = \\mathbf{W}^{(1)}\\mathbf{W}^{(2)}$ 和$\\mathbf{b} = \\mathbf{b}^{(1)} \\mathbf{W}^{(2)} + \\mathbf{b}^{(2)}$ 的等价单层模型： $$ \\mathbf{O} = (\\mathbf{X} \\mathbf{W}^{(1)} + \\mathbf{b}^{(1)})\\mathbf{W}^{(2)} + \\mathbf{b}^{(2)} = \\mathbf{X} \\mathbf{W}^{(1)}\\mathbf{W}^{(2)} + \\mathbf{b}^{(1)} \\mathbf{W}^{(2)} + \\mathbf{b}^{(2)} = \\mathbf{X} \\mathbf{W} + \\mathbf{b}. $$ 因此我们引入激活函数，对每一层的输出做一个非线性变换，这样就可以通过层的堆叠产生更有表达能力的模型了。\n1.1 隐藏层 1.2 激活函数 激活函数（activation function） 通过计算加权和并加上偏置来确定神经元是否应该被激活，它们将输入信号转换为输出的可微运算。大多数激活函数都是非线性的。\n以下是几种常用激活函数:\nReLU(Rectified linear unit) $$\\operatorname{ReLU}(x) = \\max(x, 0).$$ 没有指数，计算简单 sigmoid $$\\operatorname{sigmoid}(x) = \\frac{1}{1 + \\exp(-x)}.$$ tanh $$\\operatorname{tanh}(x) = \\frac{1 - \\exp(-2x)}{1 + \\exp(-2x)}.$$ 2 模型实现 # 模型结构 net = nn.Sequential( nn.Flatten(), nn.Linear(28*28,256), nn.ReLU(), # 激活层 nn.Linear(256,10)) # 初始化参数 def init_weights(m): if type(m) == nn.Linear: nn.init.normal_(m.weight, std = 0.01) net.apply(init_weights) batch_size, lr, num_epochs = 256, 0.1, 10 loss = nn.CrossEntropyLoss(reduction = 'none') trainer = torch.optim.SGD(net.parameters(), lr = lr) train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size) # 用的d2l库里的 d2l.train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer) 3 过拟合 将模型在训练数据上拟合的比在潜在分布中更接近的现象称为过拟合（overfitting），用于对抗过拟合的技术称为正则化（regularization）。\n权重衰退（也叫$L_2$正则化）和Dropout是常用的两种正则技术。\n3.1 权重衰退 在线性回归中，我们的损失是： $$L(\\mathbf{w}, b) = \\frac{1}{n}\\sum_{i=1}^n \\frac{1}{2}\\left(\\mathbf{w}^\\top \\mathbf{x}^{(i)} + b - y^{(i)}\\right)^2$$ 给他加入一个$| \\mathbf{w} |^2$来度量模型的复杂性，类似于在最小化损失的同时，也尽量使模型的参数不那么复杂，相当于加入了一个惩罚项。然后通过一个常数来调整二者的权衡。\n$$L(\\mathbf{w}, b) + \\frac{\\lambda}{2} |\\mathbf{w}|^2$$\n$L_2$正则化回归的小批量随机梯度下降更新如下式： $$ \\begin{aligned} \\mathbf{w} \u0026 \\leftarrow \\left(1- \\eta\\lambda \\right) \\mathbf{w} - \\frac{\\eta}{|\\mathcal{B}|} \\sum_{i \\in \\mathcal{B}} \\mathbf{x}^{(i)} \\left(\\mathbf{w}^\\top \\mathbf{x}^{(i)} + b - y^{(i)}\\right). \\end{aligned} $$\n$\\eta$和$\\lambda$一般都是小于1的，因此$(1- \\eta\\lambda)\u003c1$也就是每次更新都在尝试缩小权重$\\mathbf{w}$，这就是权重衰退。\n因此我们在实现的时候只需要改变优化器的优化方法，而没必要去改变损失函数。\ntrainer = torch.optim.SGD([ {\"params\":net[0].weight,'weight_decay': weight_decay}, {\"params\":net[0].bias}], lr=lr) 我们在实例化优化器时直接通过weight_decay指定weight decay超参数。\n默认情况下，PyTorch同时衰减权重和偏移。\n这里我们只为权重设置了weight_decay，所以偏置参数不会衰减。\n3.2 Dropout 就是在训练的过程中把某些神经元丢弃，其实就是随机注入噪声，现在的主流观点认为是一种正则化。\ndropout1, dropout2 = 0.2, 0.5 net = nn.Sequential(nn.Flatten(), nn.Linear(784, 256), nn.ReLU(), # 在第一个全连接层之后添加一个dropout层 nn.Dropout(dropout1), nn.Linear(256, 256), nn.ReLU(), # 在第二个全连接层之后添加一个dropout层 nn.Dropout(dropout2), nn.Linear(256, 10)) def init_weights(m): if type(m) == nn.Linear: nn.init.normal_(m.weight, std=0.01) net.apply(init_weights) 直接在全连接层后加一个Dropout层就好了\n值得注意的是，Dropout层只在训练期间有效，在进行推理的时候相当于不存在。\n",
+  "wordCount" : "1157",
+  "inLanguage": "zh",
+  "datePublished": "2025-09-30T22:10:25+08:00",
+  "dateModified": "2025-09-30T22:10:25+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/multilayer_perceptron/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                多层感知机
+            </h1>
+            <div class="post-description">
+                多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。
+            </div>
+            <div class="post-meta">创建:&nbsp;<span title='2025-09-30 22:10:25 +0800 CST'>2025-09-30</span>&nbsp;|&nbsp;字数:&nbsp;1157字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e6%a8%a1%e5%9e%8b%e7%bb%93%e6%9e%84" aria-label="1 模型结构">1 模型结构</a><ul>
+                        
+                <li>
+                    <a href="#11-%e9%9a%90%e8%97%8f%e5%b1%82" aria-label="1.1 隐藏层">1.1 隐藏层</a></li>
+                <li>
+                    <a href="#12-%e6%bf%80%e6%b4%bb%e5%87%bd%e6%95%b0" aria-label="1.2 激活函数">1.2 激活函数</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e6%a8%a1%e5%9e%8b%e5%ae%9e%e7%8e%b0" aria-label="2 模型实现">2 模型实现</a></li>
+                <li>
+                    <a href="#3-%e8%bf%87%e6%8b%9f%e5%90%88" aria-label="3 过拟合">3 过拟合</a><ul>
+                        
+                <li>
+                    <a href="#31-%e6%9d%83%e9%87%8d%e8%a1%b0%e9%80%80" aria-label="3.1 权重衰退">3.1 权重衰退</a></li>
+                <li>
+                    <a href="#32-dropout" aria-label="3.2 Dropout">3.2 Dropout</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><h2 id="1-模型结构">1 模型结构<a hidden class="anchor" aria-hidden="true" href="#1-模型结构">#</a></h2>
+<p>线性回归只有一层，且只能表示线性关系，这样的模型表达能力很有限。<br>
+很自然地，我们会想能不能增加网络的层数，将多个连接层堆叠，中间的层就叫隐藏层。
+这样就能增强模型的表达能力了吗？<br>
+并不是，因为每一层都是线性的，最终也还是线性的，所以多层网络最终也可以变换成一层。<br>
+对于任意权重值， 我们只需合并隐藏层，便可产生具有参数 $\mathbf{W} = \mathbf{W}^{(1)}\mathbf{W}^{(2)}$
+和$\mathbf{b} = \mathbf{b}^{(1)} \mathbf{W}^{(2)} + \mathbf{b}^{(2)}$
+的等价单层模型：
+$$
+\mathbf{O} = (\mathbf{X} \mathbf{W}^{(1)} + \mathbf{b}^{(1)})\mathbf{W}^{(2)} + \mathbf{b}^{(2)} = \mathbf{X} \mathbf{W}^{(1)}\mathbf{W}^{(2)} + \mathbf{b}^{(1)} \mathbf{W}^{(2)} + \mathbf{b}^{(2)} = \mathbf{X} \mathbf{W} + \mathbf{b}.
+$$
+因此我们引入激活函数，对每一层的输出做一个非线性变换，这样就可以通过层的堆叠产生更有表达能力的模型了。</p>
+<h3 id="11-隐藏层">1.1 隐藏层<a hidden class="anchor" aria-hidden="true" href="#11-隐藏层">#</a></h3>
+<p><img alt="多层感知机网络结构" loading="lazy" src="/img/multilayer_perceptron/mlp_network.png"></p>
+<h3 id="12-激活函数">1.2 激活函数<a hidden class="anchor" aria-hidden="true" href="#12-激活函数">#</a></h3>
+<p><strong>激活函数（activation function）</strong> 通过计算加权和并加上偏置来确定神经元是否应该被激活，它们将输入信号转换为输出的可微运算。大多数激活函数都是非线性的。</p>
+<p>以下是几种常用激活函数:<br>
+<strong>ReLU</strong>(Rectified linear unit)
+$$\operatorname{ReLU}(x) = \max(x, 0).$$
+<img alt="ReLU" loading="lazy" src="/img/multilayer_perceptron/ReLU.png"></p>
+<ul>
+<li>没有指数，计算简单</li>
+</ul>
+<p><strong>sigmoid</strong>
+$$\operatorname{sigmoid}(x) = \frac{1}{1 + \exp(-x)}.$$
+<img alt="sigmoid" loading="lazy" src="/img/multilayer_perceptron/Sigmoid.png"></p>
+<p><strong>tanh</strong>
+$$\operatorname{tanh}(x) = \frac{1 - \exp(-2x)}{1 + \exp(-2x)}.$$
+<img alt="tanh" loading="lazy" src="/img/multilayer_perceptron/tanh.png"></p>
+<h2 id="2-模型实现">2 模型实现<a hidden class="anchor" aria-hidden="true" href="#2-模型实现">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 模型结构</span>
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Flatten(),
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">28</span><span style="color:#f92672">*</span><span style="color:#ae81ff">28</span>,<span style="color:#ae81ff">256</span>),
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>ReLU(),              <span style="color:#75715e"># 激活层</span>
+</span></span><span style="display:flex;"><span>    nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">256</span>,<span style="color:#ae81ff">10</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化参数</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_weights</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>normal_(m<span style="color:#f92672">.</span>weight, std <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>net<span style="color:#f92672">.</span>apply(init_weights)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>batch_size, lr, num_epochs <span style="color:#f92672">=</span> <span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">0.1</span>, <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>loss <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>CrossEntropyLoss(reduction <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;none&#39;</span>)
+</span></span><span style="display:flex;"><span>trainer <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>SGD(net<span style="color:#f92672">.</span>parameters(), lr <span style="color:#f92672">=</span> lr)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>train_iter, test_iter <span style="color:#f92672">=</span> d2l<span style="color:#f92672">.</span>load_data_fashion_mnist(batch_size)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 用的d2l库里的</span>
+</span></span><span style="display:flex;"><span>d2l<span style="color:#f92672">.</span>train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer)
+</span></span></code></pre></div><p><img alt="train" loading="lazy" src="/img/multilayer_perceptron/train.svg"></p>
+<h2 id="3-过拟合">3 过拟合<a hidden class="anchor" aria-hidden="true" href="#3-过拟合">#</a></h2>
+<p>将模型在训练数据上拟合的比在潜在分布中更接近的现象称为<strong>过拟合（overfitting）</strong>，用于对抗过拟合的技术称为<strong>正则化（regularization）</strong>。<br>
+权重衰退（也叫$L_2$正则化）和Dropout是常用的两种正则技术。</p>
+<h3 id="31-权重衰退">3.1 权重衰退<a hidden class="anchor" aria-hidden="true" href="#31-权重衰退">#</a></h3>
+<p>在线性回归中，我们的损失是：
+$$L(\mathbf{w}, b) = \frac{1}{n}\sum_{i=1}^n \frac{1}{2}\left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right)^2$$
+给他加入一个$| \mathbf{w} |^2$来度量模型的复杂性，类似于在最小化损失的同时，也尽量使模型的参数不那么复杂，相当于加入了一个惩罚项。然后通过一个常数来调整二者的权衡。<br>
+$$L(\mathbf{w}, b) + \frac{\lambda}{2} |\mathbf{w}|^2$$</p>
+<p>$L_2$正则化回归的小批量随机梯度下降更新如下式：
+$$
+\begin{aligned}
+\mathbf{w} &amp; \leftarrow \left(1- \eta\lambda \right) \mathbf{w} - \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}} \mathbf{x}^{(i)} \left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right).
+\end{aligned}
+$$</p>
+<p>$\eta$和$\lambda$一般都是小于1的，因此$(1- \eta\lambda)&lt;1$也就是每次更新都在尝试缩小权重$\mathbf{w}$，这就是权重衰退。</p>
+<p>因此我们在实现的时候只需要改变优化器的优化方法，而没必要去改变损失函数。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>trainer <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>optim<span style="color:#f92672">.</span>SGD([
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;params&#34;</span>:net[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>weight,<span style="color:#e6db74">&#39;weight_decay&#39;</span>: weight_decay},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;params&#34;</span>:net[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>bias}], lr<span style="color:#f92672">=</span>lr)
+</span></span></code></pre></div><p>我们在实例化优化器时直接通过weight_decay指定weight decay超参数。<br>
+<strong>默认情况下，PyTorch同时衰减权重和偏移</strong>。<br>
+这里我们只为权重设置了weight_decay，所以偏置参数不会衰减。</p>
+<h3 id="32-dropout">3.2 Dropout<a hidden class="anchor" aria-hidden="true" href="#32-dropout">#</a></h3>
+<p><img alt="dropout" loading="lazy" src="/img/multilayer_perceptron/dropout.png"><br>
+就是在训练的过程中把某些神经元丢弃，其实就是随机注入噪声，现在的主流观点认为是一种正则化。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>dropout1, dropout2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.2</span>, <span style="color:#ae81ff">0.5</span>
+</span></span><span style="display:flex;"><span>net <span style="color:#f92672">=</span> nn<span style="color:#f92672">.</span>Sequential(nn<span style="color:#f92672">.</span>Flatten(),
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">784</span>, <span style="color:#ae81ff">256</span>),
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>ReLU(),
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 在第一个全连接层之后添加一个dropout层</span>
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>Dropout(dropout1),
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">256</span>),
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>ReLU(),
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 在第二个全连接层之后添加一个dropout层</span>
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>Dropout(dropout2),
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>Linear(<span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">10</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init_weights</span>(m):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> type(m) <span style="color:#f92672">==</span> nn<span style="color:#f92672">.</span>Linear:
+</span></span><span style="display:flex;"><span>        nn<span style="color:#f92672">.</span>init<span style="color:#f92672">.</span>normal_(m<span style="color:#f92672">.</span>weight, std<span style="color:#f92672">=</span><span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>net<span style="color:#f92672">.</span>apply(init_weights)
+</span></span></code></pre></div><p>直接在全连接层后加一个Dropout层就好了</p>
+<p>值得注意的是，Dropout层只在训练期间有效，在进行推理的时候相当于不存在。</p>
+
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/deeplearning_library/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>深度学习计算</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/softmax_regression/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>Softmax回归</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

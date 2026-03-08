@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>自动求导 | eivver&#39;s Blog</title>
+<meta name="keywords" content="PyTorch, 深度学习">
+<meta name="description" content="在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。
+深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。
+实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。
+自动微分使系统能够随后反向传播梯度。
+这里，反向传播（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。">
+<meta name="author" content="作者:&nbsp;eivver">
+<link rel="canonical" href="https://eivver.github.io/posts/autograd/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.css" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="16x16" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="icon" type="image/png" sizes="32x32" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="apple-touch-icon" href="https://eivver.github.io/img/tomato.bmp">
+<link rel="mask-icon" href="https://eivver.github.io/img/tomato.bmp">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh" href="https://eivver.github.io/posts/autograd/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = ""; 
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+        
+        
+        delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false}
+        ],
+         
+     throwOnError : false
+});
+ });
+</script>
+<meta property="og:url" content="https://eivver.github.io/posts/autograd/">
+  <meta property="og:site_name" content="eivver&#39;s Blog">
+  <meta property="og:title" content="自动求导">
+  <meta property="og:description" content="在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。
+深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。
+实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。
+自动微分使系统能够随后反向传播梯度。
+这里，反向传播（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。">
+  <meta property="og:locale" content="zh">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-28T20:33:35+08:00">
+    <meta property="article:modified_time" content="2025-09-28T20:33:35+08:00">
+    <meta property="article:tag" content="PyTorch">
+    <meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自动求导">
+<meta name="twitter:description" content="在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。
+深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。
+实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。
+自动微分使系统能够随后反向传播梯度。
+这里，反向传播（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "📚 文章",
+      "item": "https://eivver.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "自动求导",
+      "item": "https://eivver.github.io/posts/autograd/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "自动求导",
+  "name": "自动求导",
+  "description": "在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。\n深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。\n实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。\n自动微分使系统能够随后反向传播梯度。\n这里，反向传播（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。\n",
+  "keywords": [
+    "PyTorch", "深度学习"
+  ],
+  "articleBody": "在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。\n深度学习框架通过自动计算导数，即自动微分（automatic differentiation）来加快求导。\n实际中，根据设计好的模型，系统会构建一个计算图（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。\n自动微分使系统能够随后反向传播梯度。\n这里，反向传播（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。\n1 链式法则 1.1 标量链式法则 如果： $$y = f(g(h(x)))$$\n那么： $$ \\frac{dy}{dx} = \\frac{dy}{dg} \\cdot \\frac{dg}{dh} \\cdot \\frac{dh}{dx} $$\n1.2 向量链式法则 当y不是标量时，向量y关于向量x的导数的最自然解释是一个矩阵——雅可比矩阵。 对于高阶和高维的y和x，求导的结果可以是一个高阶张量。\n假设有一个向量函数：\n$$ \\mathbf{y} = \\begin{bmatrix} y_1 \\\\ y_2 \\\\ \\vdots \\\\ y_m \\end{bmatrix} = \\mathbf{f}(\\mathbf{x}), \\quad \\mathbf{x} = \\begin{bmatrix} x_1 \\\\ x_2 \\\\ \\vdots \\\\ x_n \\end{bmatrix} \\in \\mathbb{R}^n $$\n$\\mathbf{y} \\in \\mathbb{R}^m$ $\\mathbf{x} \\in \\mathbb{R}^n$ 那么 雅可比矩阵 (J) 定义为：\n$$ J = \\frac{\\partial \\mathbf{y}}{\\partial \\mathbf{x}}= \\begin{bmatrix} \\frac{\\partial y_1}{\\partial x_1} \u0026 \\frac{\\partial y_1}{\\partial x_2} \u0026 \\dots \u0026 \\frac{\\partial y_1}{\\partial x_n} \\\\ \\frac{\\partial y_2}{\\partial x_1} \u0026 \\frac{\\partial y_2}{\\partial x_2} \u0026 \\dots \u0026 \\frac{\\partial y_2}{\\partial x_n} \\\\ \\vdots \u0026 \\vdots \u0026 \\ddots \u0026 \\vdots \\\\ \\frac{\\partial y_m}{\\partial x_1} \u0026 \\frac{\\partial y_m}{\\partial x_2} \u0026 \\dots \u0026 \\frac{\\partial y_m}{\\partial x_n} \\ \\end{bmatrix} \\in \\mathbb{R}^{m \\times n} $$\n行：对应输出分量 (y_i) 列：对应输入分量 (x_j) 每个元素 ((i,j)) 表示 (y_i) 对 (x_j) 的偏导 同样的，在遇到嵌套的时候，也可以使用链式法则，只是当y是向量的时候结果就变成了雅可比矩阵\n假设有向量函数： $$ \\mathbf{y} = \\mathbf{f}(\\mathbf{u}), \\quad \\mathbf{u} = \\mathbf{g}(\\mathbf{x}) $$\n$\\mathbf{x} \\in \\mathbb{R}^n$ $\\mathbf{u} \\in \\mathbb{R}^m$ $\\mathbf{y} \\in \\mathbb{R}^p$ 想求 $\\frac{d \\mathbf{y}}{d \\mathbf{x}}$。\n向量函数的导数用 雅可比矩阵 表示：\n$$ \\mathbf{J}_{\\mathbf{f}} = \\frac{\\partial \\mathbf{f}}{\\partial \\mathbf{u}} \\in \\mathbb{R}^{p \\times m}, \\quad \\mathbf{J}_{\\mathbf{g}} = \\frac{\\partial \\mathbf{g}}{\\partial \\mathbf{x}} \\in \\mathbb{R}^{m \\times n} $$\n链式法则就变成矩阵乘法：\n$$ \\frac{\\partial \\mathbf{y}}{\\partial \\mathbf{x}} = \\mathbf{J}_{\\mathbf{f}} \\cdot \\mathbf{J}_{\\mathbf{g}} \\quad \\in \\mathbb{R}^{p \\times n} $$\n1.3 多元函数的链式法则 f不再是单变量函数，而是多元函数。 $$ y = f(u, v), \\quad u=g(x), \\quad v=h(x) $$\n对 x求导时，要用到 多元函数的全微分：\n$$ \\frac{dy}{dx} = \\frac{\\partial f}{\\partial u} \\cdot \\frac{du}{dx} + \\frac{\\partial f}{\\partial v} \\cdot \\frac{dv}{dx} $$\n每个中间变量 (u, v) 对 (x) 都有贡献 最终梯度是这些贡献的“加和” 其实1.2拓展的向量也是多元变量，这边特意提到是为了说明一些特殊情况也是为了解释后面提到的计算图分离\n比如： $$ y = f(u,x), \\quad u = g(x) $$\ny关于u，x有函数关系，u又关于x有函数关系。那么根据上述公式$\\frac{dy}{dx}$就可以由以下公式求得。如果画出其计算图可以发现x.grad是有两条路径的。\n$$ \\frac{dy}{dx} = \\frac{\\partial y}{\\partial u} \\cdot \\frac{du}{dx} + \\frac{\\partial y}{\\partial x} $$\n这也是pytorch中自动求导的重要依据\n2 计算图 3 Pytorch中的自动求导 3.1 自动求导的使用 x=torch.arange(4.0,requires_grad=True) #需要使requires_grad为True print(x.grad) # 默认值是None，得调用backward才会更新 y = 2 * torch.dot(x, x) y.backward() print(x.grad) # tensor([ 0., 4., 8., 12.]) y = x.sum() y.backward() print(x.grad) # tensor([ 1., 5., 9., 13.]) x.grad.zero_() # 在默认情况下，PyTorch会累积梯度，我们需要清除之前的值 y = x.sum() y.backward() print(x.grad) # tensor([1., 1., 1., 1.]) requires_grad=True 调用backward()进行前向传播更新梯度 梯度是会累计的，记得清零，（为什么不能自动清理？ 因为在图中传播的时候可能会经过多次这个节点，1.3就是一个例子） 3.2 非标量变量的反向传播 正如1.2中提到的，当y不是标量时，向量y关于向量x的导数的最自然解释是一个矩阵。\n对于高阶和高维的y和x，求导的结果可以是一个高阶张量。\n然而，虽然这些更奇特的对象确实出现在高级机器学习中（包括深度学习中）， 但当调用向量的反向计算时，我们通常会试图计算一批训练样本中每个组成部分的损失函数的导数。 这里,我们的目的不是计算微分矩阵，而是单独计算批量中每个样本的偏导数之和。\n# 对非标量调用backward需要传入一个gradient参数，该参数指定微分函数关于self的梯度。 # 如果只想求偏导数的和，所以传递一个1的梯度是合适的 x.grad.zero_() y = x * x y.backward(gradient = torch.ones(len(x))) # 等价于y.sum().backward() x.grad PyTorch 不直接存雅可比矩阵（效率低），而是用 向量-雅可比乘法 (vector-Jacobian product, VJP) 当调用 backward(gradient=v)时会发生： $x.grad = v^T \\cdot J_y$\n其实可以直接理解为我们传进去的gradient参数，就是雅可比矩阵的每一行（每个输出分量）对最终结果的权重分量，用于计算向量-雅可比乘法（VJP），最终得到输入的梯度。 对于标量输出，v 默认是 1，直接得到普通梯度 3.3 分离计算 有时我们希望 将某些计算从计算图中隔离。 例如，y 是 x 的函数，z 又依赖 x 和 y。如果想计算 z 关于 x 的梯度，但把 y 当作常数，不让梯度回传到 y，可以使用 分离操作：\nx.grad.zero_() y = x * x u = y.detach() # u 与 y 值相同，但不保留 y 的计算图 z = u * x z.sum().backward() # 只计算 z 关于 x 的梯度，u 被当作常数 x.grad == u 相当于1.3中提到的例子中 $$ \\frac{dy}{dx} = \\frac{\\partial y}{\\partial u} \\cdot \\frac{du}{dx} + \\frac{\\partial y}{\\partial x} $$ 对于y来说u是常数，因此$\\frac{\\partial y}{\\partial u}$就为0，梯度也就不会继续往前传了。\n这里梯度 不会沿着 u 流回 x 相当于把 y 从计算图中“切断”，只保留它的数值参与计算 简单理解成可以把y当成一个常数，梯度传到这里就不继续往前传了 ",
+  "wordCount" : "1914",
+  "inLanguage": "zh",
+  "datePublished": "2025-09-28T20:33:35+08:00",
+  "dateModified": "2025-09-28T20:33:35+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "eivver"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://eivver.github.io/posts/autograd/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "eivver's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://eivver.github.io/img/tomato.bmp"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://eivver.github.io/" accesskey="h" title="eivver&#39;s Blog (Alt + H)">
+                <img src="https://eivver.github.io/img/tomato.bmp" alt="" aria-label="logo"
+                    height="35">eivver&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch">
+                    
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li class="menu-item">
+                <a href="https://eivver.github.io/" title="🏠 主页">
+                    <span>🏠 主页</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/posts" title="📚 文章">
+                    <span>📚 文章</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/archives/" title="⏱️ 归档">
+                    <span>⏱️ 归档</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/about" title="🙋🏻‍♂️ 关于">
+                    <span>🙋🏻‍♂️ 关于</span>
+                    
+                </a>
+            
+            </li>
+            <li class="menu-item">
+                <a href="https://eivver.github.io/search" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                    
+                </a>
+            
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main page">
+<article class="post-single">
+    <div id="single-content">
+        <header class="post-header">
+            <div class="breadcrumbs"><a href="https://eivver.github.io/">主页</a>&nbsp;»&nbsp;<a href="https://eivver.github.io/posts/">📚 文章</a></div>
+            <h1 class="post-title">
+                自动求导
+            </h1>
+            <div class="post-meta">创建:&nbsp;<span title='2025-09-28 20:33:35 +0800 CST'>2025-09-28</span>&nbsp;|&nbsp;字数:&nbsp;1914字&nbsp;|&nbsp;作者:&nbsp;eivver
+
+</div>
+        </header> <aside id="toc-container" class="toc-container wide">
+    <div class="toc">
+        <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">目录</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e9%93%be%e5%bc%8f%e6%b3%95%e5%88%99" aria-label="1 链式法则">1 链式法则</a><ul>
+                        
+                <li>
+                    <a href="#11-%e6%a0%87%e9%87%8f%e9%93%be%e5%bc%8f%e6%b3%95%e5%88%99" aria-label="1.1 标量链式法则">1.1 标量链式法则</a></li>
+                <li>
+                    <a href="#12-%e5%90%91%e9%87%8f%e9%93%be%e5%bc%8f%e6%b3%95%e5%88%99" aria-label="1.2 向量链式法则">1.2 向量链式法则</a></li>
+                <li>
+                    <a href="#13-%e5%a4%9a%e5%85%83%e5%87%bd%e6%95%b0%e7%9a%84%e9%93%be%e5%bc%8f%e6%b3%95%e5%88%99" aria-label="1.3 多元函数的链式法则">1.3 多元函数的链式法则</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e8%ae%a1%e7%ae%97%e5%9b%be" aria-label="2 计算图">2 计算图</a></li>
+                <li>
+                    <a href="#3-pytorch%e4%b8%ad%e7%9a%84%e8%87%aa%e5%8a%a8%e6%b1%82%e5%af%bc" aria-label="3 Pytorch中的自动求导">3 Pytorch中的自动求导</a><ul>
+                        
+                <li>
+                    <a href="#31-%e8%87%aa%e5%8a%a8%e6%b1%82%e5%af%bc%e7%9a%84%e4%bd%bf%e7%94%a8" aria-label="3.1 自动求导的使用">3.1 自动求导的使用</a></li>
+                <li>
+                    <a href="#32-%e9%9d%9e%e6%a0%87%e9%87%8f%e5%8f%98%e9%87%8f%e7%9a%84%e5%8f%8d%e5%90%91%e4%bc%a0%e6%92%ad" aria-label="3.2 非标量变量的反向传播">3.2 非标量变量的反向传播</a></li>
+                <li>
+                    <a href="#33-%e5%88%86%e7%a6%bb%e8%ae%a1%e7%ae%97" aria-label="3.3 分离计算">3.3 分离计算</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+        </details>
+    </div>
+</aside>
+<script>
+    let activeElement;
+    let elements;
+    window.addEventListener('DOMContentLoaded', function (event) {
+        checkTocPosition();
+
+        elements = document.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]');
+        
+        activeElement = elements[0];
+        const id = encodeURI(activeElement.getAttribute('id')).toLowerCase();
+        document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+    }, false);
+
+    window.addEventListener('resize', function(event) {
+        checkTocPosition();
+    }, false);
+
+    window.addEventListener('scroll', () => {
+        
+        activeElement = Array.from(elements).find((element) => {
+            if ((getOffsetTop(element) - window.pageYOffset) > 0 &&
+                (getOffsetTop(element) - window.pageYOffset) < window.innerHeight/2) {
+                return element;
+            }
+        }) || activeElement
+
+        elements.forEach(element => {
+            const id = encodeURI(element.getAttribute('id')).toLowerCase();
+            if (element === activeElement){
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.add('active');
+            } else {
+                document.querySelector(`.inner ul li a[href="#${id}"]`).classList.remove('active');
+            }
+        })
+    }, false);
+
+    const main = parseInt(getComputedStyle(document.body).getPropertyValue('--article-width'), 10);
+    const toc = parseInt(getComputedStyle(document.body).getPropertyValue('--toc-width'), 10);
+    const gap = parseInt(getComputedStyle(document.body).getPropertyValue('--gap'), 10);
+
+    function checkTocPosition() {
+        const width = document.body.scrollWidth;
+        if (width - main - (toc * 2) - (gap * 4) > 0) {
+            document.getElementById("toc-container").classList.add("wide");
+        } else {
+            document.getElementById("toc-container").classList.remove("wide");
+        }
+    }
+
+    function getOffsetTop(element) {
+        if (!element.getClientRects().length) {
+            return 0;
+        }
+        let rect = element.getBoundingClientRect();
+        let win = element.ownerDocument.defaultView;
+        return rect.top + win.pageYOffset;
+    }
+</script>
+        <div class="post-content"><p>在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。<br>
+深度学习框架通过自动计算导数，即<em>自动微分</em>（automatic differentiation）来加快求导。<br>
+实际中，根据设计好的模型，系统会构建一个<em>计算图</em>（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。<br>
+自动微分使系统能够随后反向传播梯度。<br>
+这里，<em>反向传播</em>（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。</p>
+<h2 id="1-链式法则">1 链式法则<a hidden class="anchor" aria-hidden="true" href="#1-链式法则">#</a></h2>
+<h3 id="11-标量链式法则">1.1 标量链式法则<a hidden class="anchor" aria-hidden="true" href="#11-标量链式法则">#</a></h3>
+<p>如果：
+$$y = f(g(h(x)))$$</p>
+<p>那么：
+$$
+\frac{dy}{dx} = \frac{dy}{dg} \cdot \frac{dg}{dh} \cdot \frac{dh}{dx}
+$$</p>
+<h3 id="12-向量链式法则">1.2 向量链式法则<a hidden class="anchor" aria-hidden="true" href="#12-向量链式法则">#</a></h3>
+<p>当y不是标量时，向量y关于向量x的导数的最自然解释是一个矩阵——雅可比矩阵。 对于高阶和高维的y和x，求导的结果可以是一个高阶张量。<br>
+假设有一个向量函数：</p>
+<p>$$
+\mathbf{y} =
+\begin{bmatrix}
+y_1 \\ y_2 \\ \vdots \\ y_m
+\end{bmatrix}
+= \mathbf{f}(\mathbf{x}), \quad
+\mathbf{x} =
+\begin{bmatrix}
+x_1 \\ x_2 \\ \vdots \\ x_n
+\end{bmatrix}
+\in \mathbb{R}^n
+$$</p>
+<ul>
+<li>$\mathbf{y} \in \mathbb{R}^m$</li>
+<li>$\mathbf{x} \in \mathbb{R}^n$</li>
+</ul>
+<p>那么 <strong>雅可比矩阵 (J)</strong> 定义为：</p>
+<p>$$
+J = \frac{\partial \mathbf{y}}{\partial \mathbf{x}}=
+\begin{bmatrix}
+\frac{\partial y_1}{\partial x_1} &amp; \frac{\partial y_1}{\partial x_2} &amp; \dots &amp; \frac{\partial y_1}{\partial x_n} \\
+\frac{\partial y_2}{\partial x_1} &amp; \frac{\partial y_2}{\partial x_2} &amp; \dots &amp; \frac{\partial y_2}{\partial x_n} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\frac{\partial y_m}{\partial x_1} &amp; \frac{\partial y_m}{\partial x_2} &amp; \dots &amp; \frac{\partial y_m}{\partial x_n} \
+\end{bmatrix} \in \mathbb{R}^{m \times n}
+$$</p>
+<ul>
+<li><strong>行</strong>：对应输出分量 (y_i)</li>
+<li><strong>列</strong>：对应输入分量 (x_j)</li>
+<li>每个元素 ((i,j)) 表示 (y_i) 对 (x_j) 的偏导</li>
+</ul>
+<p>同样的，在遇到嵌套的时候，也可以使用链式法则，只是当y是向量的时候结果就变成了雅可比矩阵</p>
+<p>假设有向量函数：
+$$
+\mathbf{y} = \mathbf{f}(\mathbf{u}), \quad \mathbf{u} = \mathbf{g}(\mathbf{x})
+$$</p>
+<ul>
+<li>$\mathbf{x} \in \mathbb{R}^n$</li>
+<li>$\mathbf{u} \in \mathbb{R}^m$</li>
+<li>$\mathbf{y} \in \mathbb{R}^p$</li>
+</ul>
+<p>想求 $\frac{d \mathbf{y}}{d \mathbf{x}}$。</p>
+<p>向量函数的导数用 <strong>雅可比矩阵</strong> 表示：</p>
+<p>$$
+\mathbf{J}_{\mathbf{f}} = \frac{\partial \mathbf{f}}{\partial \mathbf{u}} \in \mathbb{R}^{p \times m}, \quad
+\mathbf{J}_{\mathbf{g}} = \frac{\partial \mathbf{g}}{\partial \mathbf{x}} \in \mathbb{R}^{m \times n}
+$$</p>
+<p>链式法则就变成矩阵乘法：</p>
+<p>$$
+\frac{\partial \mathbf{y}}{\partial \mathbf{x}} = \mathbf{J}_{\mathbf{f}} \cdot \mathbf{J}_{\mathbf{g}} \quad \in \mathbb{R}^{p \times n}
+$$</p>
+<h3 id="13-多元函数的链式法则">1.3 多元函数的链式法则<a hidden class="anchor" aria-hidden="true" href="#13-多元函数的链式法则">#</a></h3>
+<p>f不再是单变量函数，而是多元函数。
+$$
+y = f(u, v), \quad u=g(x), \quad v=h(x)
+$$</p>
+<p>对 x求导时，要用到 <strong>多元函数的全微分</strong>：</p>
+<p>$$
+\frac{dy}{dx} = \frac{\partial f}{\partial u} \cdot \frac{du}{dx} + \frac{\partial f}{\partial v} \cdot \frac{dv}{dx}
+$$</p>
+<ul>
+<li>每个中间变量 (u, v) 对 (x) 都有贡献</li>
+<li>最终梯度是这些贡献的“加和”</li>
+</ul>
+<p>其实1.2拓展的向量也是多元变量，这边特意提到是为了说明一些特殊情况也是为了解释后面提到的计算图分离<br>
+比如：
+$$
+y = f(u,x), \quad u = g(x)
+$$</p>
+<p>y关于u，x有函数关系，u又关于x有函数关系。那么根据上述公式$\frac{dy}{dx}$就可以由以下公式求得。如果画出其计算图可以发现x.grad是有两条路径的。</p>
+<p>$$
+\frac{dy}{dx} = \frac{\partial y}{\partial u} \cdot \frac{du}{dx} + \frac{\partial y}{\partial x}
+$$</p>
+<p><strong>这也是pytorch中自动求导的重要依据</strong></p>
+<h2 id="2-计算图">2 计算图<a hidden class="anchor" aria-hidden="true" href="#2-计算图">#</a></h2>
+<p><img alt="计算图" loading="lazy" src="/img/autograd/Computation%20Graph.png"></p>
+<h2 id="3-pytorch中的自动求导">3 Pytorch中的自动求导<a hidden class="anchor" aria-hidden="true" href="#3-pytorch中的自动求导">#</a></h2>
+<h3 id="31-自动求导的使用">3.1 自动求导的使用<a hidden class="anchor" aria-hidden="true" href="#31-自动求导的使用">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>x<span style="color:#f92672">=</span>torch<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">4.0</span>,requires_grad<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>) <span style="color:#75715e">#需要使requires_grad为True</span>
+</span></span><span style="display:flex;"><span>print(x<span style="color:#f92672">.</span>grad)   <span style="color:#75715e"># 默认值是None，得调用backward才会更新</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> torch<span style="color:#f92672">.</span>dot(x, x)
+</span></span><span style="display:flex;"><span>y<span style="color:#f92672">.</span>backward()
+</span></span><span style="display:flex;"><span>print(x<span style="color:#f92672">.</span>grad)   <span style="color:#75715e"># tensor([ 0.,  4.,  8., 12.])</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> x<span style="color:#f92672">.</span>sum()
+</span></span><span style="display:flex;"><span>y<span style="color:#f92672">.</span>backward()
+</span></span><span style="display:flex;"><span>print(x<span style="color:#f92672">.</span>grad)   <span style="color:#75715e"># tensor([ 1.,  5.,  9., 13.])</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>x<span style="color:#f92672">.</span>grad<span style="color:#f92672">.</span>zero_()  <span style="color:#75715e"># 在默认情况下，PyTorch会累积梯度，我们需要清除之前的值</span>
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> x<span style="color:#f92672">.</span>sum()
+</span></span><span style="display:flex;"><span>y<span style="color:#f92672">.</span>backward()
+</span></span><span style="display:flex;"><span>print(x<span style="color:#f92672">.</span>grad)   <span style="color:#75715e"># tensor([1., 1., 1., 1.])</span>
+</span></span></code></pre></div><ul>
+<li>requires_grad=True</li>
+<li>调用backward()进行前向传播更新梯度</li>
+<li>梯度是会累计的，记得清零，<em>（为什么不能自动清理？ 因为在图中传播的时候可能会经过多次这个节点，1.3就是一个例子）</em></li>
+</ul>
+<h3 id="32-非标量变量的反向传播">3.2 非标量变量的反向传播<a hidden class="anchor" aria-hidden="true" href="#32-非标量变量的反向传播">#</a></h3>
+<p>正如1.2中提到的，当<code>y</code>不是标量时，向量<code>y</code>关于向量<code>x</code>的导数的最自然解释是一个矩阵。<br>
+对于高阶和高维的<code>y</code>和<code>x</code>，求导的结果可以是一个高阶张量。</p>
+<p>然而，虽然这些更奇特的对象确实出现在高级机器学习中（包括<strong>深度学习中</strong>），
+但当调用向量的反向计算时，我们通常会试图计算一批训练样本中每个组成部分的损失函数的导数。
+这里,<strong>我们的目的不是计算微分矩阵，而是单独计算批量中每个样本的偏导数之和。</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 对非标量调用backward需要传入一个gradient参数，该参数指定微分函数关于self的梯度。</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果只想求偏导数的和，所以传递一个1的梯度是合适的</span>
+</span></span><span style="display:flex;"><span>x<span style="color:#f92672">.</span>grad<span style="color:#f92672">.</span>zero_()
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> x <span style="color:#f92672">*</span> x
+</span></span><span style="display:flex;"><span>y<span style="color:#f92672">.</span>backward(gradient <span style="color:#f92672">=</span> torch<span style="color:#f92672">.</span>ones(len(x))) <span style="color:#75715e"># 等价于y.sum().backward() </span>
+</span></span><span style="display:flex;"><span>x<span style="color:#f92672">.</span>grad
+</span></span></code></pre></div><ul>
+<li>PyTorch <strong>不直接存雅可比矩阵</strong>（效率低），而是用 <strong>向量-雅可比乘法 (vector-Jacobian product, VJP)</strong></li>
+<li>当调用 <code>backward(gradient=v)</code>时会发生：
+$x.grad = v^T \cdot J_y$<br>
+其实可以直接理解为我们传进去的gradient参数，就是雅可比矩阵的每一行（每个输出分量）对最终结果的权重分量，用于计算向量-雅可比乘法（VJP），最终得到输入的梯度。</li>
+<li>对于标量输出，<code>v</code> 默认是 1，直接得到普通梯度</li>
+</ul>
+<h3 id="33-分离计算">3.3 分离计算<a hidden class="anchor" aria-hidden="true" href="#33-分离计算">#</a></h3>
+<p>有时我们希望 <strong>将某些计算从计算图中隔离</strong>。
+例如，<code>y</code> 是 <code>x</code> 的函数，<code>z</code> 又依赖 <code>x</code> 和 <code>y</code>。如果想计算 <code>z</code> 关于 <code>x</code> 的梯度，但把 <code>y</code> 当作常数，不让梯度回传到 <code>y</code>，可以使用 <strong>分离操作</strong>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>x<span style="color:#f92672">.</span>grad<span style="color:#f92672">.</span>zero_()
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> x <span style="color:#f92672">*</span> x
+</span></span><span style="display:flex;"><span>u <span style="color:#f92672">=</span> y<span style="color:#f92672">.</span>detach()      <span style="color:#75715e"># u 与 y 值相同，但不保留 y 的计算图</span>
+</span></span><span style="display:flex;"><span>z <span style="color:#f92672">=</span> u <span style="color:#f92672">*</span> x
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>z<span style="color:#f92672">.</span>sum()<span style="color:#f92672">.</span>backward()  <span style="color:#75715e"># 只计算 z 关于 x 的梯度，u 被当作常数</span>
+</span></span><span style="display:flex;"><span>x<span style="color:#f92672">.</span>grad <span style="color:#f92672">==</span> u
+</span></span></code></pre></div><p>相当于1.3中提到的例子中
+$$
+\frac{dy}{dx} = \frac{\partial y}{\partial u} \cdot \frac{du}{dx} + \frac{\partial y}{\partial x}
+$$
+对于y来说u是常数，因此$\frac{\partial y}{\partial u}$就为0，梯度也就不会继续往前传了。</p>
+<ul>
+<li>这里梯度 <strong>不会沿着 u 流回 x</strong></li>
+<li>相当于把 <code>y</code> 从计算图中“切断”，只保留它的数值参与计算</li>
+<li>简单理解成可以把<code>y</code>当成一个常数，梯度传到这里就不继续往前传了</li>
+</ul>
+
+
+        </div>
+
+        <footer class="post-footer">
+            
+<nav class="paginav">
+  <a class="prev" href="https://eivver.github.io/posts/linear_regression/">
+    <span class="title">« 上一页</span>
+    <br>
+    <span>线性回归</span>
+  </a>
+  <a class="next" href="https://eivver.github.io/posts/data_operations/">
+    <span class="title">下一页 »</span>
+    <br>
+    <span>数据操作</span>
+  </a>
+</nav>
+
+        </footer>
+    </div>
+</article>
+</main>
+
+
+<footer class="footer">
+
+     
+    <a href="https://beian.miit.gov.cn/" target="_blank" style="border-bottom:1px solid"></a>&nbsp;
+    |
+    <span>
+        Copyright
+        &copy;
+        2025-2026
+        <a href="https://eivver.github.io/" style="border-bottom:1px solid">eivver&#39;s Blog</a>
+    </span>
+
+    
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <span class="topInner">
+        <svg class="topSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+            <path d="M12 6H0l6-6z" />
+        </svg>
+        <span id="read_progress"></span>
+    </span>
+</a>
+
+<script>
+    document.addEventListener('scroll', function (e) {
+        const readProgress = document.getElementById("read_progress");
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        
+        readProgress.innerText = ((scrollTop / (scrollHeight - clientHeight)).toFixed(2) * 100).toFixed(0);
+    })
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    let mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+
+
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = '复制';
+
+        function copyingDone() {
+            copybutton.innerText = '已复制！';
+            setTimeout(() => {
+                copybutton.innerText = '复制';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) {
+            }
+            ;
+            selection.removeRange(range);
+        });
+
+        let language = codeblock.className.replaceAll("language-", "")
+        let macTool = document.createElement("div")
+        let macTool1 = document.createElement("div")
+        let macTool2 = document.createElement("div")
+        let macTool3 = document.createElement("div")
+        let languageType = document.createElement("div")
+        languageType.innerText = language
+        macTool.setAttribute('class', 'mac-tool')
+        macTool1.setAttribute('class', 'mac bb1')
+        macTool2.setAttribute('class', 'mac bb2')
+        macTool3.setAttribute('class', 'mac bb3')
+        languageType.setAttribute('class', 'language-type')
+        macTool.appendChild(macTool1)
+        macTool.appendChild(macTool2)
+        macTool.appendChild(macTool3)
+        macTool.appendChild(languageType)
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else if (container.parentNode.firstChild === container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName === "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+            container.appendChild(macTool)
+        }
+    });
+</script>
+
+</body>
+
+</html>

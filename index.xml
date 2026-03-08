@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>eivver&#39;s Blog</title>
+    <link>https://eivver.github.io/</link>
+    <description>Recent content on eivver&#39;s Blog</description>
+    <generator>Hugo -- 0.149.1</generator>
+    <language>zh</language>
+    <lastBuildDate>Tue, 25 Nov 2025 11:33:14 +0800</lastBuildDate>
+    <atom:link href="https://eivver.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Transformer</title>
+      <link>https://eivver.github.io/posts/transformer/</link>
+      <pubDate>Tue, 25 Nov 2025 11:33:14 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/transformer/</guid>
+      <description>Transformer是一种采用注意力机制的深度学习架构，这一机制可以按输入数据各部分重要性的不同而分配不同的权重。于2017年由谷歌大脑的一个团队在论文《Attention Is All You Need》中提出，现已逐步取代长短期记忆（LSTM）等RNN模型成为了NLP问题的首选模型。并行化优势允许其在更大的数据集上进行训练。这也促成了BERT、GPT等预训练模型的发展。  </description>
+    </item>
+    <item>
+      <title>循环神经网络</title>
+      <link>https://eivver.github.io/posts/rnn/</link>
+      <pubDate>Fri, 10 Oct 2025 13:18:47 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/rnn/</guid>
+      <description>循环神经网络(Recurrent Neural Networks，RNNs)已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。</description>
+    </item>
+    <item>
+      <title>卷积神经网络</title>
+      <link>https://eivver.github.io/posts/cnn/</link>
+      <pubDate>Sat, 04 Oct 2025 20:53:57 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/cnn/</guid>
+      <description>卷积神经网络（convolutional neural network，CNN）是一类强大的、为处理图像数据而设计的神经网络。 基于卷积神经网络架构的模型在计算机视觉领域中已经占主导地位，当今几乎所有的图像识别、目标检测或语义分割相关的学术竞赛和商业应用都以这种方法为基础。</description>
+    </item>
+    <item>
+      <title>深度学习计算</title>
+      <link>https://eivver.github.io/posts/deeplearning_library/</link>
+      <pubDate>Thu, 02 Oct 2025 15:31:23 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/deeplearning_library/</guid>
+      <description>涉及深度学习计算的关键组件，即模型构建、参数访问与初始化、设计自定义层和块、将模型读写到磁盘，以及利用GPU实现显著的加速</description>
+    </item>
+    <item>
+      <title>多层感知机</title>
+      <link>https://eivver.github.io/posts/multilayer_perceptron/</link>
+      <pubDate>Tue, 30 Sep 2025 22:10:25 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/multilayer_perceptron/</guid>
+      <description>多层感知机在输出层和输入层之间增加一个或多个全连接隐藏层，并通过激活函数转换隐藏层的输出。</description>
+    </item>
+    <item>
+      <title>Softmax回归</title>
+      <link>https://eivver.github.io/posts/softmax_regression/</link>
+      <pubDate>Tue, 30 Sep 2025 17:10:03 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/softmax_regression/</guid>
+      <description>softmax用来解决分类的问题</description>
+    </item>
+    <item>
+      <title>线性回归</title>
+      <link>https://eivver.github.io/posts/linear_regression/</link>
+      <pubDate>Mon, 29 Sep 2025 18:45:25 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/linear_regression/</guid>
+      <description>线性回归是一种最基础的监督学习方法，用来研究输入特征和输出变量之间的线性关系。</description>
+    </item>
+    <item>
+      <title>自动求导</title>
+      <link>https://eivver.github.io/posts/autograd/</link>
+      <pubDate>Sun, 28 Sep 2025 20:33:35 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/autograd/</guid>
+      <description>&lt;p&gt;在深度学习中，通常通过梯度下降来优化代求的权重，就需要知道其梯度的方向，而一个模型往往有很多层，也可以看成由很多个函数的嵌套。我们常常需要求导数来进行权重的更新。&lt;br&gt;
+深度学习框架通过自动计算导数，即&lt;em&gt;自动微分&lt;/em&gt;（automatic differentiation）来加快求导。&lt;br&gt;
+实际中，根据设计好的模型，系统会构建一个&lt;em&gt;计算图&lt;/em&gt;（computational graph），来跟踪计算是哪些数据通过哪些操作组合起来产生输出。&lt;br&gt;
+自动微分使系统能够随后反向传播梯度。&lt;br&gt;
+这里，&lt;em&gt;反向传播&lt;/em&gt;（backpropagate）意味着跟踪整个计算图，填充关于每个参数的偏导数。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>数据操作</title>
+      <link>https://eivver.github.io/posts/data_operations/</link>
+      <pubDate>Fri, 12 Sep 2025 22:51:19 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/data_operations/</guid>
+      <description>PyTorch中数据操作的一些简单笔记</description>
+    </item>
+    <item>
+      <title>安装PyTorch踩的坑</title>
+      <link>https://eivver.github.io/posts/install_debug/</link>
+      <pubDate>Fri, 12 Sep 2025 21:32:53 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/install_debug/</guid>
+      <description>记录一些在Windows下安装PyTorch踩的坑。</description>
+    </item>
+    <item>
+      <title>🙋🏻‍♂️ 关于</title>
+      <link>https://eivver.github.io/about/</link>
+      <pubDate>Wed, 10 Sep 2025 19:42:59 +0800</pubDate>
+      <guid>https://eivver.github.io/about/</guid>
+      <description>&lt;p&gt;&lt;br&gt;&lt;br/&gt;&lt;/p&gt;
+&lt;h4 id=&#34;-关于本站&#34;&gt;🏡 关于本站&lt;/h4&gt;
+&lt;p&gt;本博客主要记录一些学习生活。&lt;/p&gt;
+&lt;h4 id=&#34;-博主是谁&#34;&gt;👦🏻 博主是谁&lt;/h4&gt;
+&lt;p&gt;电子信息科学与技术 | XMU在读 | 大四&lt;/p&gt;
+&lt;h4 id=&#34;-兴趣爱好&#34;&gt;🏹 兴趣爱好&lt;/h4&gt;
+&lt;p&gt;🎮️ 游戏 | 🛌 摆烂&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;br/&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
