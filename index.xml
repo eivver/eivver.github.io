@@ -6,8 +6,15 @@
     <description>Recent content on eivver&#39;s Blog</description>
     <generator>Hugo -- 0.149.1</generator>
     <language>zh</language>
-    <lastBuildDate>Tue, 25 Nov 2025 11:33:14 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 20 Mar 2026 20:14:55 +0800</lastBuildDate>
     <atom:link href="https://eivver.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C/C&#43;&#43;嵌套声明 const常量声明</title>
+      <link>https://eivver.github.io/posts/c_cpp_pointer/</link>
+      <pubDate>Fri, 20 Mar 2026 20:14:55 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/c_cpp_pointer/</guid>
+      <description>对C/C&#43;&#43;嵌套声明的一些理解</description>
+    </item>
     <item>
       <title>Transformer</title>
       <link>https://eivver.github.io/posts/transformer/</link>

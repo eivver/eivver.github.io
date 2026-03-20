@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>C/C&#43;&#43; on eivver&#39;s Blog</title>
+    <link>https://eivver.github.io/tags/c/c&#43;&#43;/</link>
+    <description>Recent content in C/C&#43;&#43; on eivver&#39;s Blog</description>
+    <generator>Hugo -- 0.149.1</generator>
+    <language>zh</language>
+    <lastBuildDate>Fri, 20 Mar 2026 20:14:55 +0800</lastBuildDate>
+    <atom:link href="https://eivver.github.io/tags/c/c++/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C/C&#43;&#43;嵌套声明 const常量声明</title>
+      <link>https://eivver.github.io/posts/c_cpp_pointer/</link>
+      <pubDate>Fri, 20 Mar 2026 20:14:55 +0800</pubDate>
+      <guid>https://eivver.github.io/posts/c_cpp_pointer/</guid>
+      <description>对C/C&#43;&#43;嵌套声明的一些理解</description>
+    </item>
+  </channel>
+</rss>
